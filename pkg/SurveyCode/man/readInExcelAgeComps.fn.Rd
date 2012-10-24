@@ -48,22 +48,12 @@ readInExcelAgeComps.fn(file, sheet = "AgeComps", headerRow = 7)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (file, sheet = "AgeComps", headerRow = 7) 
-{
-    nombres <- c("SpeciesCode", "Species", "Year", "Project", 
-        "AreaName", "MinStratumDepth", "MaxStratumDepth", "Length", 
-        "Age", "NumF", "NumM", "NumUnsexed", "LengthedAgeTally", 
-        "AgeTallyF", "AgeTallyM", "AgeTallyU")
-    xx <- readDataFromExcel.fn(file, sheet, headerRow)
-    names(xx) <- nombres
-    cat("\nNOTE: column names have been modified from the Excel Sheet. You may want to verify that they match.\n\n")
-    return(xx)
-  }
+%##---- Should be DIRECTLY executable !! ----
+%##-- ==>  Define data, use random,
+%##--	or do  help(data=index)  for the standard data sets.
+ 
+%## The function is currently defined as
+%function (file, sheet = "AgeComps", headerRow = 7) 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

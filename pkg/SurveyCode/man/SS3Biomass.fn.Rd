@@ -51,36 +51,12 @@ SS3Biomass.fn(bio, fleet = "EnterFleet", season = 1, outputMedian = T)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (bio, fleet = "EnterFleet", season = 1, outputMedian = T) 
-{
-    xxx <- split(bio[, c("AreaName", "MinStratumDepth", "MaxStratumDepth", 
-        "Biomass", "BiomassVar")], bio$Year)
-    years <- names(xxx)
-    bio <- unlist(lapply(xxx, function(x) {
-        sum(x$Biomass, na.rm = T)
-    }))
-    variance <- unlist(lapply(xxx, function(x) {
-        sum(x$BiomassVar, na.rm = T)
-    }))
-    cv <- sqrt(variance)/bio
-    seLogB <- sqrt(log(cv^2 + 1))
-    if (outputMedian == T) {
-        med <- bio * exp(-0.5 * seLogB^2)
-        out <- data.frame(Year = years, Season = season, Fleet = fleet, 
-            Value = med, seLogB = seLogB)
-    }
-    else {
-        out <- data.frame(Year = years, Season = season, Fleet = fleet, 
-            Value = bio, seLogB = seLogB)
-    }
-    row.names(out) <- NULL
-    return(out)
-  }
+%##---- Should be DIRECTLY executable !! ----
+%##-- ==>  Define data, use random,
+%##--	or do  help(data=index)  for the standard data sets.
+ 
+%## The function is currently defined as
+%function (bio, fleet = "EnterFleet", season = 1, outputMedian = T) 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

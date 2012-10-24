@@ -51,26 +51,17 @@ readInBiomass.fn(filename, headerRow = 1, sep = ",", colNames = c("Species", "Sc
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (filename, headerRow = 1, sep = ",", colNames = c("Species", 
-    "ScientificName", "SpeciesCode", "Year", "Project", "StrataAreaVersion", 
-    "AreaSetId", "AreaName", "SouthernLatitude", "NorthernLatitude", 
-    "DepthStrataSet", "MinStratumDepth", "MaxStratumDepth", "StratumArea", 
-    "Biomass", "Abundance", "CpueWeightVar", "CpueCountVar", 
-    "BiomassVar", "CV", "N", "Nbio", "Npos", "NbioPos")) 
-{
-    xx <- read.table(filename, skip = headerRow - 1, sep = sep, 
-        header = T)
-    if (length(colNames) == ncol(xx)) {
-        names(xx) <- colNames
-        cat("NOTE: column names have been modified from the csv file. You may want to verify that they match.\n")
-    }
-    return(xx)
-  }
+%##---- Should be DIRECTLY executable !! ----
+%##-- ==>  Define data, use random,
+%##--	or do  help(data=index)  for the standard data sets.
+ 
+%## The function is currently defined as
+%function (filename, headerRow = 1, sep = ",", colNames = c("Species", 
+%    "ScientificName", "SpeciesCode", "Year", "Project", "StrataAreaVersion", 
+%    "AreaSetId", "AreaName", "SouthernLatitude", "NorthernLatitude", 
+%    "DepthStrataSet", "MinStratumDepth", "MaxStratumDepth", "StratumArea", 
+%    "Biomass", "Abundance", "CpueWeightVar", "CpueCountVar", 
+%    "BiomassVar", "CV", "N", "Nbio", "Npos", "NbioPos")) 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

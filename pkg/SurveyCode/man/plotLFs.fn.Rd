@@ -57,16 +57,13 @@ plotLFs.fn(dat, inch = 0.15, ylab = "Bins", xlab = "Year", zero2NAs = T, ...)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (dat, inch = 0.15, ylab = "Bins", xlab = "Year", zero2NAs = T, 
-    ...) 
-{
-    plotFreqData.fn(dat, inch, ylab, xlab, zero2NAs, ...)
-  }
+%##---- Should be DIRECTLY executable !! ----
+%##-- ==>  Define data, use random,
+%##--	or do  help(data=index)  for the standard data sets.
+ 
+%## The function is currently defined as
+%function (dat, inch = 0.15, ylab = "Bins", xlab = "Year", zero2NAs = T, 
+%    ...) 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

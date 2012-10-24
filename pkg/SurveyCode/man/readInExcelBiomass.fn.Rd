@@ -51,31 +51,12 @@ readInExcelBiomass.fn(file, sheet = "BiomassAbundance", headerRow = 6, colNames 
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (file, sheet = "BiomassAbundance", headerRow = 6, colNames = NA) 
-{
-    xx <- readDataFromExcel.fn(file, sheet, headerRow)
-    if (is.null(colNames[1])) {
-        nombres <- c("Species", "ScientificName", "SpeciesCode", 
-            "Year", "Project", "StrataAreaVersion", "AreaSetId", 
-            "AreaName", "SouthernLatitude", "NorthernLatitude", 
-            "DepthStrataSet", "MinStratumDepth", "MaxStratumDepth", 
-            "StratumArea", "Biomass", "Abundance", "CpueWeightVar", 
-            "CpueCountVar", "BiomassVar", "CV", "N", "Nbio", 
-            "Npos", "NbioPos")
-        names(xx) <- nombres
-        cat("NOTE: column names have been modified from the Excel Sheet. You may want to verify that they match.\n")
-    }
-    if (!is.na(colNames[1])) {
-        names(xx) <- colNames
-        return(xx)
-    }
-    return(xx)
-  }
+%##---- Should be DIRECTLY executable !! ----
+%##-- ==>  Define data, use random,
+%##--	or do  help(data=index)  for the standard data sets.
+ 
+%## The function is currently defined as
+%function (file, sheet = "BiomassAbundance", headerRow = 6, colNames = NA) 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

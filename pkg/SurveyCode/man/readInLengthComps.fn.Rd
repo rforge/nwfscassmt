@@ -51,23 +51,15 @@ readInLengthComps.fn(file, headerRow = 7, sep = ",", colNames = c("SpeciesCode",
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (file, headerRow = 7, sep = ",", colNames = c("SpeciesCode", 
-    "ScientificName", "Species", "Year", "Project", "AreaSetIdentifier", 
-    "AreaName", "DepthStrataSet", "MinStratumDepth", "MaxStratumDepth", 
-    "Length", "NumF", "NumM", "NumUnsexed")) 
-{
-    xx <- read.table(file, skip = headerRow - 1, sep = sep, header = T)
-    if (length(colNames) == ncol(xx)) {
-        names(xx) <- colNames
-        cat("NOTE: column names have been modified from the csv file. You may want to verify that they match.\n")
-    }
-    return(xx)
-  }
+%##---- Should be DIRECTLY executable !! ----
+%##-- ==>  Define data, use random,
+%##--	or do  help(data=index)  for the standard data sets.
+ 
+%## The function is currently defined as
+%function (file, headerRow = 7, sep = ",", colNames = c("SpeciesCode", 
+%    "ScientificName", "Species", "Year", "Project", "AreaSetIdentifier", 
+%    "AreaName", "DepthStrataSet", "MinStratumDepth", "MaxStratumDepth", 
+%    "Length", "NumF", "NumM", "NumUnsexed")) 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

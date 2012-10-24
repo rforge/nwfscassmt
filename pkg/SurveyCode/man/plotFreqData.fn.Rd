@@ -57,49 +57,13 @@ plotFreqData.fn(dat, inch = 0.15, ylab = "Bins", xlab = "Year", zero2NAs = T, ..
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (dat, inch = 0.15, ylab = "Bins", xlab = "Year", zero2NAs = T, 
-    ...) 
-{
-    x <- as.numeric(as.character(dat$year))
-    gender <- dat$gender[1]
-    dat <- dat[, -c(1:6)]
-    if (gender == 0) {
-        dat <- dat[, -match("U0.1", names(dat))]
-        dat <- dat[, -match("U0", names(dat))]
-    }
-    if (gender == 3) {
-        dat <- dat[, -match("F0", names(dat))]
-        dat <- dat[, -match("M0", names(dat))]
-    }
-    numLens <- ncol(dat)/2
-    y <- as.numeric(substring(names(dat), 2))
-    y <- y[1:numLens]
-    if (zero2NAs) {
-        dat[dat == 0] <- NA
-    }
-    if (gender == 0) {
-        z <- c(unlist(dat[, 1:numLens]), max(dat))
-        symbols(c(rep(x, length(y)), 0), c(rep(y, each = length(x)), 
-            0), circles = z, main = "Unsexed+Males+Females", 
-            inches = inch, xlab = xlab, ylab = ylab, xlim = range(x), 
-            ...)
-    }
-    if (gender == 3) {
-        z <- c(unlist(dat[, 1:numLens]), max(dat))
-        symbols(c(rep(x, length(y)), 0), c(rep(y, each = length(x)), 
-            0), circles = z, main = "Female", inches = inch, 
-            xlab = xlab, ylab = ylab, xlim = range(x), ...)
-        z <- c(unlist(dat[, (numLens + 1):ncol(dat)]), max(dat))
-        symbols(c(rep(x, length(y)), 0), c(rep(y, each = length(x)), 
-            0), circles = z, main = "Male", inches = inch, xlab = xlab, 
-            ylab = ylab, xlim = range(x), ...)
-    }
-  }
+%##---- Should be DIRECTLY executable !! ----
+%##-- ==>  Define data, use random,
+%##--	or do  help(data=index)  for the standard data sets.
+ 
+%## The function is currently defined as
+%function (dat, inch = 0.15, ylab = "Bins", xlab = "Year", zero2NAs = T, 
+%    ...) 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

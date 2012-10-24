@@ -57,17 +57,17 @@ GetTotalBiomassExcel.fn(file, sheet = "BiomassAbundance", headerRow, fleet = "En
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (file, sheet = "BiomassAbundance", headerRow, fleet = "EnterFleet", 
-    season = 1, outputMedian = T) 
-{
-    bio <- readInExcelBiomass.fn(file, sheet, headerRow)
-    SS3Biomass.fn(bio, fleet, season)
-  }
+%##---- Should be DIRECTLY executable !! ----
+%##-- ==>  Define data, use random,
+%##--	or do  help(data=index)  for the standard data sets.
+ 
+%## The function is currently defined as
+%function (file, sheet = "BiomassAbundance", headerRow, fleet = "EnterFleet", 
+%    season = 1, outputMedian = T) 
+%{
+%    bio <- readInExcelBiomass.fn(file, sheet, headerRow)
+%    SS3Biomass.fn(bio, fleet, season)
+%  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

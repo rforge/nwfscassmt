@@ -71,20 +71,20 @@ GetAges.fn(file, headerRow, lgthBins = 1, ageBins = 1, nSamps = "EnterNsamps", f
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+%##---- Should be DIRECTLY executable !! ----
+%##-- ==>  Define data, use random,
+%##--	or do  help(data=index)  for the standard data sets.
 
-## The function is currently defined as
-function (file, headerRow, lgthBins = 1, ageBins = 1, nSamps = "EnterNsamps", 
-    fleet = "EnterFleet", season = 1, partition = 0, ageerr = "EnterAgeErr", 
-    raw = T, sep = ",") 
-{
-    age <- readInAgeComps.fn(file, headerRow = headerRow, sep = sep)
-    SS3AgeAtLen.fn(age, lgthBins = lgthBins, ageBins = ageBins, 
-        fleet = fleet, season = season, partition = partition, 
-        ageerr = ageerr, raw = raw)
-  }
+%## The function is currently defined as
+%function (file, headerRow, lgthBins = 1, ageBins = 1, nSamps = "EnterNsamps", 
+%    fleet = "EnterFleet", season = 1, partition = 0, ageerr = "EnterAgeErr", 
+%    raw = T, sep = ",") 
+%{
+%    age <- readInAgeComps.fn(file, headerRow = headerRow, sep = sep)
+%    SS3AgeAtLen.fn(age, lgthBins = lgthBins, ageBins = ageBins, 
+%        fleet = fleet, season = season, partition = partition, 
+%        ageerr = ageerr, raw = raw)
+%  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

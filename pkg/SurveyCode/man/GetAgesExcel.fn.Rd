@@ -72,20 +72,20 @@ GetAgesExcel.fn(file, sheet = "AgeComps", headerRow, lgthBins = 1, ageBins = 1, 
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (file, sheet = "AgeComps", headerRow, lgthBins = 1, 
-    ageBins = 1, nSamps = "EnterNsamps", fleet = "EnterFleet", 
-    season = 1, partition = 0, ageerr = "EnterAgeErr", raw = T) 
-{
-    age <- readInExcelAgeComps.fn(file, sheet = sheet, headerRow = headerRow)
-    SS3AgeAtLen.fn(age, lgthBins = lgthBins, ageBins = ageBins, 
-        fleet = fleet, season = season, partition = partition, 
-        ageerr = ageerr, raw = raw)
-  }
+%##---- Should be DIRECTLY executable !! ----
+%##-- ==>  Define data, use random,
+%##--	or do  help(data=index)  for the standard data sets.
+ 
+%## The function is currently defined as
+%function (file, sheet = "AgeComps", headerRow, lgthBins = 1, 
+%    ageBins = 1, nSamps = "EnterNsamps", fleet = "EnterFleet", 
+%    season = 1, partition = 0, ageerr = "EnterAgeErr", raw = T) 
+%{
+%    age <- readInExcelAgeComps.fn(file, sheet = sheet, headerRow = headerRow)
+%    SS3AgeAtLen.fn(age, lgthBins = lgthBins, ageBins = ageBins, 
+%        fleet = fleet, season = season, partition = partition, 
+%        ageerr = ageerr, raw = raw)
+%  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
