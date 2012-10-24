@@ -2,7 +2,7 @@
 \alias{plotLFs.fn}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Plots frequency data (deprecated) and now should use plotFreqData.fn
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~

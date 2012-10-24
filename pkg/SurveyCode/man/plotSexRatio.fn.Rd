@@ -2,7 +2,7 @@
 \alias{plotSexRatio.fn}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Plots the sex ratio by length bins
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~

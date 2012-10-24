@@ -2,7 +2,7 @@
 \alias{readDataFromExcel.fn}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Read biomass data from Excel file
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~

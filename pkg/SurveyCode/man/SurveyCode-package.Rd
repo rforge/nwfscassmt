@@ -3,7 +3,7 @@
 \alias{SurveyCode}
 \docType{package}
 \title{
-What the package does (short line)
+Functions used to analyze NWFSC survey data and create input for SS3
 ~~ package title ~~
 }
 \description{

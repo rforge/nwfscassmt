@@ -2,7 +2,7 @@
 \alias{strataBiomass.fn}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Enumerates biomass by strata
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~

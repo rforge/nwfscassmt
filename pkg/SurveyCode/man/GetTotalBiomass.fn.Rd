@@ -2,10 +2,11 @@
 \alias{GetTotalBiomass.fn}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Output the biomass in SS3 format, reading in from a csv file
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+A wrapper for to output the biomass in SS3 format, reading in from a csv file
+
 }
 \usage{
 GetTotalBiomass.fn(file, headerRow, fleet = "EnterFleet", season = 1, outputMedian = T)

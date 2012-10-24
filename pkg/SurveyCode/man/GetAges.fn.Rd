@@ -2,18 +2,17 @@
 \alias{GetAges.fn}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Reads in age data and returns age frequencies in SS3 format
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
-}
+calls readInAgeComps.fn, 
+then calls SS3AgeAtLen.fn}
 \usage{
 GetAges.fn(file, headerRow, lgthBins = 1, ageBins = 1, nSamps = "EnterNsamps", fleet = "EnterFleet", season = 1, partition = 0, ageerr = "EnterAgeErr", raw = T, sep = ",")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{file}{
-%%     ~~Describe \code{file} here~~
+  \item{file}{\code{file} with data~~
 }
   \item{headerRow}{
 %%     ~~Describe \code{headerRow} here~~

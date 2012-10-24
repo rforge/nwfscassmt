@@ -2,7 +2,7 @@
 \alias{readInLengthComps.fn}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Read in length comps from a csv file
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~

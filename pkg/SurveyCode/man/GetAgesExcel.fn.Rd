@@ -2,10 +2,10 @@
 \alias{GetAgesExcel.fn}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Reads in age data from Excel file and returns age frequencies in SS3 format
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+calls readInExcelAgeComps.fn, then calls SS3AgeAtLen.fn
 }
 \usage{
 GetAgesExcel.fn(file, sheet = "AgeComps", headerRow, lgthBins = 1, ageBins = 1, nSamps = "EnterNsamps", fleet = "EnterFleet", season = 1, partition = 0, ageerr = "EnterAgeErr", raw = T)

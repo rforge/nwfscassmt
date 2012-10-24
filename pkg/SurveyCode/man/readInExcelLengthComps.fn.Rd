@@ -2,7 +2,7 @@
 \alias{readInExcelLengthComps.fn}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Read in length comps from Excel file provided by survey team
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~

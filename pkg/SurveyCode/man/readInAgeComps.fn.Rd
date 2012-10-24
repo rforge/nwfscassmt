@@ -2,7 +2,7 @@
 \alias{readInAgeComps.fn}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Reads in age comps from a csv file provided by survey team
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
