@@ -1,8 +1,5 @@
-updateSurveyCode <- function (local = NULL, save = FALSE, revision = "newest",env=.GlobalEnv,pos=2) 
+updateSurveyCode <- function (local = NULL, save = FALSE, revision = "newest",env="updatedSurveyCode",pos=2) 
 {
-
-stop("NOT FINISHED")
-
     if(!is.environment(env)) {  #if env is an environment simply wirte to that. If not, create a new environment
         if(!is.character(env)) stop("'env' must be an environment or a character vector. Use default if not sure to assign objects into global workspace\n")
         if(is.character(env)) {
@@ -12,15 +9,19 @@ stop("NOT FINISHED")
     getwebnames <- function() {
         changes <- readLines("http://r-forge.r-project.org/scm/viewvc.php/pkg/nwfscSurveyCode/R/?root=nwfscassmt")
         line <- changes[grep("Directory revision:", changes)+1]  #Most recent revision is on next line
-        cat("most recent change:", strsplit(strsplit(line, ">")[[1]][3], 
-            "<")[[1]][1], "\n")
-        current_revision <- as.numeric(strsplit(strsplit(line, 
-            "detail?r=", fixed = TRUE)[[1]][2], "\">")[[1]][1])
+        current_revision <- as.numeric(strsplit(strsplit(line, "revision=",fixed=T)[[1]][2],"\">")[[1]][1])  #"
         cat("current revision number:", current_revision, "\n")
+        tmp <- readLines(paste("http://r-forge.r-project.org/scm/viewvc.php?view=rev&root=nwfscassmt&revision=",current_revision,sep="")) 
+        line <- tmp[grep("Date:",tmp)[1]+1]
+        lastDate <- strsplit(strsplit(line,"<td>")[[1]][2]," ")[[1]]
+        cat("most recent change:", lastDate[c(1:3,5:6)], "\n")
         if (revision == "newest") {
-            webdir <- "http://r4ss.googlecode.com/svn/trunk/"
+            webdir <- "http://r-forge.r-project.org/scm/viewvc.php/pkg/nwfscSurveyCode/R/?root=nwfscassmt"
+            revision <- current_revision
+            revDate <- lastDate[c(1:3,5:6)]
         }
         else {
+            stop("VERSIONS NOT WORKING")
             if (is.numeric(revision) && revision <= current_revision) {
                 webdir <- paste("http://r4ss.googlecode.com/svn-history/r", 
                   revision, "/trunk/", sep = "")
@@ -32,24 +33,30 @@ stop("NOT FINISHED")
         }
         cat("getting file names from", webdir, "\n")
         lines <- readLines(webdir, warn = F)
-        filenames <- lines[grep("\"*.R\"", lines)]
-        for (i in 1:length(filenames)) filenames[i] <- strsplit(filenames[i], 
-            "\">")[[1]][2]
-        for (i in 1:length(filenames)) filenames[i] <- strsplit(filenames[i], 
-            "</a>")[[1]][1]
-        return(list(filenames = filenames, webdir = webdir))
+        filenames <- lines[grep("*\\.R\"", lines)]   #"
+        filenames <- unlist(lapply(strsplit(filenames,"name=\""),function(x){x[2]}))
+        filenames <- unlist(lapply(strsplit(filenames,"\""),function(x){x[1]}))
+        return(list(filenames = filenames, revision = revision, current_revision=current_revision,revDate=revDate))
     }
     getwebfiles <- function(fileinfo) {
         filenames <- fileinfo$filenames
-        webdir <- fileinfo$webdir
+        revision <- fileinfo$revision
+        current_revision <- fileinfo$current_revision
+        revDate <- fileinfo$revDate
+        if(revision!=current_revision) stop("Former revision unable to be read in\n")
+        webdir <- "http://r-forge.r-project.org/scm/viewvc.php/*checkout*/pkg/nwfscSurveyCode/R/"   #GetAges.fn.R?revision=7&root=nwfscassmt
         n <- length(filenames)
         cat(n, "files found\n")
-        if (save) 
+        if (save) {
             cat("saving all files to", local, "\n")
+            cat("NWFSC Survey Code\n",file=paste(local,"RevisionInfo.txt",sep="/"))
+            cat("This is revision",revision,"of",current_revision,"\n",file=paste(local,"RevisionInfo.txt",sep="/"),append=T)
+            cat("From",revDate,"\n",file=paste(local,"RevisionInfo.txt",sep="/"),append=T)
+        }
         for (i in 1:n) {
-            webfile <- paste(webdir, filenames[i], sep = "/")
-            if (filenames[i] == "update_r4ss_files.R") 
-                webfile <- "http://r4ss.googlecode.com/svn/trunk/update_r4ss_files.R"
+            webfile <- paste(webdir, filenames[i],"?revision=",revision,"&root=nwfscassmt", sep = "")
+            if (filenames[i] == "updateSurveyCode.R") 
+                webfile <- paste(webdir, filenames[i],"?revision=",current_revision,"&root=nwfscassmt", sep = "")
             if (save) {
                 localfile <- paste(local, filenames[i], sep = "/")
                 temp <- readLines(webfile)
