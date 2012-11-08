@@ -20,3 +20,5 @@ function(bio,theStrata="Year",fleet="EnterFleet",season=1,outputMedian=T) {
     row.names(out) <- NULL
     return(out)
 }
+
+#work!
