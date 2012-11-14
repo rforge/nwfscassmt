@@ -1,9 +1,9 @@
-Package: anRpackage
+Package: AgeingError
 Type: Package
-Title: What the package does (short line)
+Title: Ageing error 
 Version: 1.0
 Date: 2012-11-14
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Author: James Thorson and Andre Punt
+Maintainer: James Thorson <James.Thorson@noaa.gov>
+Description: Creates ageing error matrices for multiple readers of fishery otoliths or other hard parts, using double-read data.
+License: GPL-2
