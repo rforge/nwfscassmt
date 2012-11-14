@@ -59,7 +59,7 @@ RunFn = function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, Minus
       # Starting value must be non-zero
       if(BiasOpt[BiasI]==2){
         write.table(rMx(c(0.001,10,1,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
-        write.table(rMx(c(-10,1,0.1,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
+        write.table(rMx(c(-10,1,0.01,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
         write.table(rMx(c(0.001,MaxAge*2,MaxAge,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
       }
     }
@@ -74,7 +74,7 @@ RunFn = function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, Minus
       # Starting value must be non-zero
       if(SigOpt[SigI]==2){
         write.table(rMx(c(0.001,100,1,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
-        write.table(rMx(c(-10,1,0.1,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
+        write.table(rMx(c(-10,1,0.01,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
         write.table(rMx(c(0.001,100,10,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
       }
       # Curvilinear CV
@@ -82,7 +82,7 @@ RunFn = function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, Minus
       # Starting value must be non-zero
       if(SigOpt[SigI]==3){
         write.table(rMx(c(0.001,3,0.1,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
-        write.table(rMx(c(-10,1,0.1,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
+        write.table(rMx(c(-10,1,0.01,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
         write.table(rMx(c(0.001,3,0.1,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
       }
     }

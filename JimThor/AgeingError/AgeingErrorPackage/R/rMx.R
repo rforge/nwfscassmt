@@ -1,3 +1,4 @@
+
 rMx <-
 function(Input){
   if(is.vector(Input)){Output<-t(as.matrix(Input))}  

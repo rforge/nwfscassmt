@@ -1,3 +1,4 @@
+
 SimulatorFn <-
 function(Nreaders, M, SelexForm, ErrorParams, BiasParams, SelexParams, ReadsMat, RecCv=0.6, RecAr1=0.8, Amax=100){
 
