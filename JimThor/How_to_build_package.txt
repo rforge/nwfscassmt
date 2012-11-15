@@ -1,0 +1,30 @@
+
+Installing necessary software:
+1a. Download R tools
+1b. Set path variable (Computer -> System Properties -> Advanced -> Environmental Variables -> Path)
+
+Beginning:
+2a. Load a clean R instance, load functions, and run package.skeleton()  
+2b. Add a line space at the beginning of each function in directory "R"
+2c. Add a title (without %% at the beginning of the line) to the line after "\title{" in the "man" directory
+2d. Remove text after "\examples{" in for all files in "man" directory
+2e. Make "BinaryFiles" in top-level package directory and list all files (1 per line) in the "inst/exectables/" directory
+
+Building:
+6. Open a shell (Start -> Run -> cmd)
+8. Run "R CMD build nwfscAgeingError"
+9. Run "R CMD INSTALL --build nwfscAgeingError"
+
+
+setwd("C:\\Users\\James Thorson\\Desktop\\UW Hideaway\\NWFSC\\NwfscAssmt\\JimThor\\AgeingError\\")
+package.skeleton("AgeingErrorPackage")
+
+Info: 
+http://cran.r-project.org/doc/manuals/R-exts.html#Non_002dR-scripts-in-packages
+
+
+Calling an EXE from a package:
+paste(system.file(package="AgeingErrorPackage"),"/executables",sep="")
+library.dynam("packA", pkg, lib, DLLpath = system.file("libs", package="packB"))
+shell()
+
