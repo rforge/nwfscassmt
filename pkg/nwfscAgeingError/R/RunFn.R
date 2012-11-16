@@ -79,7 +79,8 @@ function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, MinusAge, Plu
   # Run ADMB file
   if(JustWrite==FALSE){
     setwd(SaveFile)
-    Output = shell("agemat.exe -est",intern=Intern)
+    #Output = shell("agemat.exe -est",intern=Intern)
+    Output = system("agemat.exe -est",intern=Intern)
     Admb = scan(paste(SaveFile,"agemat.par",sep=""),comment.char="#",quiet=TRUE)
   }
 }
