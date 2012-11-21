@@ -20,9 +20,8 @@ DataFile = SourceFile
 setwd(SourceFile)
 
 # Load data and strata
-LoadFn(paste(DataFile,"RexSole.03.09.dmp",sep=""))
-masterDat = RexSole.03.09
-masterDat = masterDat[which(masterDat$SURVEY==3),]
+masterDat = read.csv(paste(DataFile,"RandomSpecies.csv",sep=""))
+#LoadFn(paste(DataFile,"RandomSpecies.dmp",sep=""))
 strata.limits <- readIn(ncol=5,nlines=6)
   STRATA  NLat SLat MinDepth MaxDepth
   A      49.0 36.0  55        183
@@ -32,8 +31,8 @@ strata.limits <- readIn(ncol=5,nlines=6)
   E      34.5 32.0  55        549
 
 # Modify data slightly
-species = "Rex"
-names(masterDat)[8] = species
+species = "RandomSpecies"
+names(masterDat)[9] = species
 
 # Preliminary data processing
 processData()
