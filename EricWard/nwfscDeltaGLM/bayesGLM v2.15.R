@@ -1,4 +1,4 @@
-###################               CHANGE LOG           #############################
+###################               CHANGE LOG            #############################
 ######################################################################################
 #v 2.4: Eric Ward added user-specified bounds for logit and log functions, 10/2/2012.
 #v 2.5: JimT fixed bugs related to diagnostic plots
