@@ -1201,7 +1201,7 @@ ComputeIndices = function(Data, Model, FileName, maxDims=6, Folder=NA, Weights="
 #########
 # Compute MLE index of abundance
 #########
-ComputeMleIndices = function(Data, Model, FileName, Folder=NA, Weights="StrataAreas", StrataTable){
+ComputeMleIndices = function(Data, Model, FileName, Folder=NA, Weights="StrataAreas", StrataTable, Run=TRUE){
   
   # Make folder
   if(is.na(Folder)) Folder = paste(getwd(),"/",sep="")  
@@ -1218,7 +1218,7 @@ ComputeMleIndices = function(Data, Model, FileName, Folder=NA, Weights="StrataAr
   DataNew = data.frame(DataNew, logeffort=rep(log(1),nrow(DataNew)), vesselYear=rep(999,nrow(DataNew)), ones.vec=rep(log(1),nrow(DataNew)))   # I need to include ones.vec as zero for some reason
 
   # Only run if there's no random effects and the distribution is either Gamma and Lognormal
-  if( (modelStructure$VesselYear.zeroTows%in%c("zero","fixed")) & (modelStructure$VesselYear.positiveTows%in%c("zero","fixed")) & (modelStructure$StrataYear.zeroTows%in%c("zero","fixed")) & (modelStructure$StrataYear.positiveTows%in%c("zero","fixed"))  & (Dist=="gamma" | Dist=="lognormal")){
+  if( (modelStructure$VesselYear.zeroTows%in%c("zero","fixed")) & (modelStructure$VesselYear.positiveTows%in%c("zero","fixed")) & (modelStructure$StrataYear.zeroTows%in%c("zero","fixed")) & (modelStructure$StrataYear.positiveTows%in%c("zero","fixed"))  & (Dist=="gamma" | Dist=="lognormal") & Run==TRUE){
     # Default formulae
     FormulaPres = " ~ 0 + factor(year)"
     if(nlevels(strata)>1) FormulaPres = paste(FormulaPres," + factor(strata)",sep="")
@@ -1376,7 +1376,10 @@ doMCMCDiags = function(directory, mods, McmcDiagnostics=FALSE) {
     # JAGS indices of abundance
     McmcIndices = ComputeIndices(Data=Data, Model=Model, FileName="", Folder=Folder, Weights=c("StrataAreas","Equal")[1], StrataTable=StrataTable)
     # MLE indices of abundance
-    MleIndices = ComputeMleIndices(Data=Data, Model=Model, FileName="", Folder=Folder, Weights=c("StrataAreas","Equal")[1], StrataTable=StrataTable)
+    MleIndices = try(ComputeMleIndices(Data=Data, Model=Model, FileName="", Folder=Folder, Weights=c("StrataAreas","Equal")[1], StrataTable=StrataTable, Run=TRUE), silent=TRUE)
+    if(inherits(MleIndices, "try-error")==TRUE){
+      MleIndices = ComputeMleIndices(Data=Data, Model=Model, FileName="", Folder=Folder, Weights=c("StrataAreas","Equal")[1], StrataTable=StrataTable, Run=FALSE)
+    }
     
     # Compare JAGS and MLE
     jpeg(paste(Folder,"/","","Index_Comparison.jpg",sep=""),width=2*3,height=2*3,res=200,units="in")
