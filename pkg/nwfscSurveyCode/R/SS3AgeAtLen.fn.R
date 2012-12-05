@@ -8,18 +8,19 @@ function(ages,lgthBins=1,ageBins=1,fleet="EnterFleet",season=1,partition=0,ageer
     #Gender=2: males only. Female values ignored.
     #lgthBins is either the interval between length bins or the actual length bins
     #note that 0 and Inf are tacked on the ends to account for lengths and ages outside the interval. You may want to add these in to first and last bin.
+
     years <- sort(unique(ages$Year))
     if(length(lgthBins)==1) {
-        Lengths <- c(0,seq(floor(min(ages$Length)),ceiling(max(ages$Length)),lgthBins),Inf)
+        Lengths <- c(-999,seq(floor(min(ages$Length)),ceiling(max(ages$Length)),lgthBins),Inf)
     }
     else{
-        Lengths <- c(0,lgthBins,Inf)        #put 0 and Inf on ends because all.inside=T in findInterval below. Treats these as minus and plus groups
+        Lengths <- c(-999,lgthBins,Inf)        #put 0 and Inf on ends because all.inside=T in findInterval below. Treats these as minus and plus groups
     }
     if(length(ageBins)==1) {
-        Ages <- c(0,seq(floor(min(ages$Age)),ceiling(max(ages$Age)),ageBins),Inf)
+        Ages <- c(-999,seq(floor(min(ages$Age)),ceiling(max(ages$Age)),ageBins),Inf)
     }
     else{
-        Ages <- c(0,ageBins,Inf)        #put 0 and Inf on ends because all.inside=T in findInterval below. Treats these as minus and plus groups
+        Ages <- c(-999,ageBins,Inf)        #put 0 and Inf on ends because all.inside=T in findInterval below. Treats these as minus and plus groups
     }
     allLs <- Lengths[findInterval(ages$Length,Lengths,all.inside=T)]   #finds the interval that the length falls in and floors it (so 23.2 would be in 23 if 23 was a level in Lengths, all.inside puts maximum age group into N-1 group, thus I padded with Inf.)
 
@@ -102,14 +103,15 @@ function(ages,lgthBins=1,ageBins=1,fleet="EnterFleet",season=1,partition=0,ageer
     AsM[is.na(AsM)] <- 0
     AsF <- matrix(AsF,nrow=length(A.bin),byrow=T,
           dimnames=list(NULL,paste(rep("F",length(ages)),ages,sep="")))
-    AsF[,"F1"] <- AsF[,"F0"]+AsF[,"F1"]     #add in all ages before the minimum age to the first age bin
-    numFzero <- sum(AsF[,"F0"])
-    AsF <- AsF[,-match("F0",dimnames(AsF)[[2]])]        #remove F0 column
+print(colnames(AsF))
+    AsF[,2] <- AsF[,1]+AsF[,2]     #add in all ages before the minimum age to the first age bin
+    numFminus <- sum(AsF[,1])
+    AsF <- AsF[,-1]        #remove minus group column
     AsM <- matrix(AsM,nrow=length(A.bin),byrow=T,
           dimnames=list(NULL,paste(rep("M",length(ages)),ages,sep="")))
-    AsM[,"M1"] <- AsM[,"M0"]+AsM[,"M1"]     #add in all ages before the minimum age to the first age bin
-    numMzero <- sum(AsM[,"M0"])
-    AsM <- AsM[,-match("M0",dimnames(AsM)[[2]])]
+    AsM[,2] <- AsM[,1]+AsM[,2]     #add in all ages before the minimum age to the first age bin
+    numMminus <- sum(AsM[,1])
+    AsM <- AsM[,-1]
 
     outF <- data.frame(year=as.numeric(substring(names(A.bin),1,4)),Season=season,Fleet=fleet,gender=1,partition=partition,ageErr=ageerr,
                           LbinLo=as.numeric(substring(names(A.bin),6)),LbinHi=as.numeric(substring(names(A.bin),6)),nSamps=nsF,AsF,AsF)
@@ -122,8 +124,8 @@ function(ages,lgthBins=1,ageBins=1,fleet="EnterFleet",season=1,partition=0,ageer
     rownames(outF) <- paste("F",1:nrow(outF),sep="")
     rownames(outM) <- paste("M",1:nrow(outM),sep="")
 
-    cat("There are",numFzero,"females in the age 0 to age",ages[2],"that were added into the first age bin\n")
-    cat("There are",numMzero,"males in the age 0 to age",ages[2],"that were added into the first age bin\n")
-    cat("The number of fish in each sample were input into the nSamps column\nUse Beth's Excel file for the number of tows")
+    cat("There are",numFminus,"females less than age",ages[2],"that were added into the first age bin\n")
+    cat("There are",numMminus,"males less than age",ages[2],"that were added into the first age bin\n")
+    cat("The number of fish in each sample were input into the nSamps column\nUse Beth's Excel file for the number of tows\n")
     return(list(female=outF,male=outM))
 }

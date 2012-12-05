@@ -23,10 +23,10 @@ function(len,lgthBins=1,gender=3,nSamps="EnterNsamps",fleet="EnterFleet",season=
     #     maxSizeUnsexed determines the maximum size at which the sexRatioUnsexed is applied. If sexRatioUnsexed is a vector, this is ignored
     
     if(length(lgthBins)==1) {
-        Lengths <- c(0,seq(floor(min(len$Length)),ceiling(max(len$Length)),lgthBins),Inf)
+        Lengths <- c(-999,seq(floor(min(len$Length)),ceiling(max(len$Length)),lgthBins),Inf)
     }
     else{
-        Lengths <- c(0,lgthBins,Inf)        #put 0 and Inf on ends because all.inside=T in findInterval below. Treats these as minus and plus groups
+        Lengths <- c(-999,lgthBins,Inf)        #put 0 and Inf on ends because all.inside=T in findInterval below. Treats these as minus and plus groups
     }
 
     len$allLs <- Lengths[findInterval(len$Length,Lengths,all.inside=T)]
@@ -108,6 +108,6 @@ function(len,lgthBins=1,gender=3,nSamps="EnterNsamps",fleet="EnterFleet",season=
         out <- data.frame(year=as.numeric(names(L.year)),Season=season,Fleet=fleet,gender=gender,partition=partition,nSamps=nSamps,Ls)
     }
 
-    cat("\nNOTE: You may need to add the column called F0 and/or M0 to your first length bin\n\tand delete that column.\n\tThese are the proportion of lengths smaller than the first length bin\n\n")
+    cat("\nNOTE: You may need to add the column called F.999 and/or M.999 to your first length bin\n\tand delete that column.\n\tThese are the percentage of lengths smaller than the first length bin\n\n")
     return(out)
 }

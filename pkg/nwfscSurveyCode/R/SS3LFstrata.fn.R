@@ -17,10 +17,10 @@ function(len,Strata="Year",lgthBins=1,gender=3,nSamps="EnterNsamps",fleet="Enter
     xx <- split(len[,c("Length","NumF","NumM","NumUnsexed")],len[,Strata])
     years <- names(xx)
     if(length(lgthBins)==1) {
-        Lengths <- c(0,seq(floor(min(len$Length)),ceiling(max(len$Length)),lgthBins),Inf)
+        Lengths <- c(-999,seq(floor(min(len$Length)),ceiling(max(len$Length)),lgthBins),Inf)
     }
     else{
-        Lengths <- c(0,lgthBins,Inf)        #put 0 and Inf on ends because all.inside=T in findInterval below. Treats these as minus and plus groups
+        Lengths <- c(-999,lgthBins,Inf)        #put 0 and Inf on ends because all.inside=T in findInterval below. Treats these as minus and plus groups
     }
 
     year.fn <- function(x,Lengths) {
@@ -58,7 +58,7 @@ function(len,Strata="Year",lgthBins=1,gender=3,nSamps="EnterNsamps",fleet="Enter
         out <- data.frame(year=names(L.year),Season=season,Fleet=fleet,gender=gender,partition=partition,nSamps=nSamps,Ls)
     }
 
-    cat("\nNOTE: You may need to delete a column called F0 and/or M0. These are the proportion of lengths smaller than the first length bin\n\n")
+    cat("\nNOTE: You may need to delete a column called F.999 and/or M.999. These are the percentage of lengths smaller than the first length bin\n\n")
     return(out)
 }
 #tmp <- SS3LFstrata.fn(PetLen,lgthBins=2,gender=3)  #same as SS3LF.fn
