@@ -103,7 +103,6 @@ function(ages,lgthBins=1,ageBins=1,fleet="EnterFleet",season=1,partition=0,ageer
     AsM[is.na(AsM)] <- 0
     AsF <- matrix(AsF,nrow=length(A.bin),byrow=T,
           dimnames=list(NULL,paste(rep("F",length(ages)),ages,sep="")))
-print(colnames(AsF))
     AsF[,2] <- AsF[,1]+AsF[,2]     #add in all ages before the minimum age to the first age bin
     numFminus <- sum(AsF[,1])
     AsF <- AsF[,-1]        #remove minus group column
