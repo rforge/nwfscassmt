@@ -110,7 +110,7 @@ processData = function() {
 
 # For MCMC samples, the total number of iterations returned will be (chains * iterToSave) / thin rate
 ###########################################################################################
-fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "random","VesselYear.positiveTows" = "random","StrataYear.zeroTows" ="random","VesselYear.zeroTows" = "random", "Catchability.positiveTows" = "one", "Catchability.zeroTows" = "zero", "year.deviations" = "uncorrelated","strata.deviations" = "uncorrelated"),covariates=list(positive=FALSE,binomial=FALSE),likelihood = "gamma", model.name = "deltaGLM.txt", fit.model=TRUE, mcmc.control = list(chains = 5, thin = 1, burn = 5000, iterToSave = 2000),Parallel=TRUE, Species = "NULL",logitBounds = c(-5,5),logBounds = c(-5,5), prior.scale = rep(25,4)) {
+fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "random","VesselYear.positiveTows" = "random","StrataYear.zeroTows" ="random","VesselYear.zeroTows" = "random", "Catchability.positiveTows" = "one", "Catchability.zeroTows" = "zero", "year.deviations" = "uncorrelated","strata.deviations" = "uncorrelated"),covariates=list(positive=FALSE,binomial=FALSE),likelihood = "gamma", model.name = "deltaGLM.txt", fit.model=TRUE, mcmc.control = list(chains = 5, thin = 1, burn = 5000, iterToSave = 2000),Parallel=TRUE, Species = "NULL",logitBounds = c(-20,20),logBounds = c(-20,20), prior.scale = rep(25,4)) {
 
   if(modelStructure$Catchability.positiveTows%in%c("linear","quadratic") | modelStructure$Catchability.zeroTows%in%c("one","linear","quadratic")){
     print("Warning: index will not have comparable scale to a design-based (raw) index unless catchability.positiveTows equals 'one'  catchability.zeroTows equals 'zero'") 
@@ -220,7 +220,7 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   stratayear.string = paste(SYpos.string,SYzero.string)
   if(modelStructure$StrataYear.zeroTows == "correlated" & modelStructure$StrataYear.positiveTows == "correlated") {
   	# strata year deviations are MVN RE
-  	stratayear.string = paste("   strataYearTau[1:2,1:2] ~ dwish(R[1:2,1:2],2);\n   for(i in 1:nSY) {\n   sydevs[i,1:2] ~ dmnorm(zs[1:2],strataYearTau[1:2,1:2]);\n      SYdev[i] <- min(max(sydevs[i,1],",logBounds[1],"),",logBounds[2],");\n      pSYdev[i] <- min(max(sydevs[i,2],",logitBounds[1],"),",logitBounds[2],");\n   }\n",sep="")	
+  	stratayear.string = paste("sigmaSY[1] <- 0;\n   sigmaSY[2] <- 0;\n      strataYearTau[1:2,1:2] ~ dwish(R[1:2,1:2],2);\n   for(i in 1:nSY) {\n   sydevs[i,1:2] ~ dmnorm(zs[1:2],strataYearTau[1:2,1:2]);\n      SYdev[i] <- min(max(sydevs[i,1],",logBounds[1],"),",logBounds[2],");\n      pSYdev[i] <- min(max(sydevs[i,2],",logitBounds[1],"),",logitBounds[2],");\n   }\n",sep="")	
   }
   
   # Vessel-year interactions cab be (1) fixed, (2) random, (3) randomExpanded, or (4) not estimated (set to 0) 
@@ -242,7 +242,7 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
 
   if(modelStructure$VesselYear.zeroTows == "correlated" & modelStructure$VesselYear.positiveTows == "correlated") {
   	# vessel year deviations are MVN RE
-  	vesselyear.string = paste("   vesselYearTau[1:2,1:2] ~ dwish(R[1:2,1:2],2);\n   for(i in 1:nVY) {\n   vydevs[i,1:2] ~ dmnorm(zs[1:2],vesselYearTau[1:2,1:2]);\n      VYdev[i] <- min(max(vydevs[i,1],",logBounds[1],"),",logBounds[2],");\n      pVYdev[i] <- min(max(vydevs[i,2],",logitBounds[1],"),",logitBounds[2],");\n   }\n",sep="")	
+  	vesselyear.string = paste("sigmaVY[1] <- 0;\n   sigmaVY[2] <- 0;\n   vesselYearTau[1:2,1:2] ~ dwish(R[1:2,1:2],2);\n   for(i in 1:nVY) {\n   vydevs[i,1:2] ~ dmnorm(zs[1:2],vesselYearTau[1:2,1:2]);\n      VYdev[i] <- min(max(vydevs[i,1],",logBounds[1],"),",logBounds[2],");\n      pVYdev[i] <- min(max(vydevs[i,2],",logitBounds[1],"),",logitBounds[2],");\n   }\n",sep="")	
   }
   
   ####################################################################
