@@ -11,7 +11,7 @@ runif(1)
 
 options(stringsAsFactors=TRUE)
 
-my.wd<- SourceFile <- "//nwcfs2/assessment/Thorson/delta-GLMM/"
+my.wd<- SourceFile <- "C:/Users/James.Thorson/Desktop/NWFSC_SVN/EricWard/nwfscDeltaGLM/"
 source(paste(my.wd,"bayesGLM v2.15.R",sep=""))
 Letters = apply(MARGIN=1,FUN=paste,collapse="",expand.grid(letters,letters))
 
@@ -31,7 +31,7 @@ strata.limits <- readIn(ncol=5,nlines=6)
   E      34.5 32.0  55        549
 
 # Modify data slightly
-species = "RandomSpecies"
+species = "Example_Species"
 names(masterDat)[9] = species
 
 # Preliminary data processing
