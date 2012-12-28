@@ -20,7 +20,7 @@ DataFile = SourceFile
 setwd(SourceFile)
 
 # Load data and strata
-masterDat = read.csv(paste(DataFile,"RandomSpecies.csv",sep=""))
+masterDat = read.csv(paste(DataFile,"Example_Species.csv",sep=""))
 #LoadFn(paste(DataFile,"RandomSpecies.dmp",sep=""))
 strata.limits <- readIn(ncol=5,nlines=6)
   STRATA  NLat SLat MinDepth MaxDepth
