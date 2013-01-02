@@ -37,6 +37,7 @@ processData = function() {
   # Exclude tows with some missing entry
   Exclude = which(apply(Data, MARGIN=1, FUN=function(Vec){any(is.na(Vec))}))
   print(paste("Excluded ",length(Exclude)," additional observations that had some missing data",sep=""))
+  write.table(Data[Exclude],"excludedTows.csv",row.names=F,col.names=T,sep=",")
   if(length(Exclude) < 10 & length(Exclude) > 0) print(Data[Exclude,])
   if(length(Exclude) >= 10) print("Entries are not printed to the screen due to having 10 or more")
   if(length(Exclude) > 0) Data = Data[-Exclude,]
