@@ -8,7 +8,7 @@ Plot a map with bubbles indicating size of attribute
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-mapBubbles(dat, depths = NULL, plotMap = T, maxValue = max(dat$Z), maxSize = 0.3, fgCircle = "black", bgCircle = rgb(0, 0, 0, 0.3), type = "surface", zeroSize = 0.04, fgZero = gray(0.5), bgZero = gray(0.5), legendPos = "bottomright", legendBreaks = NULL, legendType = "vert", legendTitle = NULL, legendCex = 0.8, legendTitleCex = legendCex, ...)
+mapBubbles(dat, depths = NULL, plotMap = T, maxValue = max(dat$Z), maxSize = 0.3, circle.fg = "black", circle.bg = rgb(0, 0, 0, 0.3), type = "surface", zeroSize = 0.04, fgZero = gray(0.5), bgZero = gray(0.5), legendPos = "bottomright", legendBreaks = NULL, legendType = "vert", legendTitle = NULL, legendCex = 0.8, legendTitleCex = legendCex, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,10 +27,10 @@ mapBubbles(dat, depths = NULL, plotMap = T, maxValue = max(dat$Z), maxSize = 0.3
   \item{maxSize}{
 %%     ~~Describe \code{maxSize} here~~
 }
-  \item{fgCircle}{
+  \item{circle.fg}{
 %%     ~~Describe \code{fgCircle} here~~
 }
-  \item{bgCircle}{
+  \item{circle.bg}{
 %%     ~~Describe \code{bgCircle} here~~
 }
   \item{type}{
@@ -93,52 +93,17 @@ mapBubbles(dat, depths = NULL, plotMap = T, maxValue = max(dat$Z), maxSize = 0.3
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (dat, depths = NULL, plotMap = T, maxValue = max(dat$Z), 
-    maxSize = 0.3, fgCircle = "black", bgCircle = rgb(0, 0, 0, 
-        0.3), type = "surface", zeroSize = 0.04, fgZero = gray(0.5), 
-    bgZero = gray(0.5), legendPos = "bottomright", legendBreaks = NULL, 
-    legendType = "vert", legendTitle = NULL, legendCex = 0.8, 
-    legendTitleCex = legendCex, ...) 
-{
-    if (plotMap) {
-        plotMap(westCoastLL, tck = c(-0.02), ...)
-        if (exists("westCoastLL")) {
-            addLines(westCoastLL)
-        }
-        else {
-            print("Run data(westCoastLL) before calling this function to plot West Coast shoreline")
-        }
-        if (exists("WCstatesInlandPBS")) {
-            addLines(WCstatesInlandPBS)
-        }
-        else {
-            print("Run data(WCstatesInlandPBS) before calling this function to plot state boundaries")
-        }
-        if (!is.null(depths)) {
-            for (i in 1:length(depths)) {
-                addLines(depths[[i]], col = gray(0.5))
-            }
-        }
-    }
-    ind0 <- dat$Z <= 0
-    ind <- dat$Z > 0
-    symbols(dat[ind0, "Longitude"], dat[ind0, "Latitude"], squares = rep(1, 
-        sum(ind0)), add = T, fg = fgZero, bg = fgZero, inches = zeroSize)
-    tmp <- dat[ind, ]
-    event <- as.EventData(data.frame(EID = 1:nrow(tmp), X = tmp$Longitude, 
-        Y = tmp$Latitude, Z = tmp$Z))
-    .addBubbles.ach(event, type = type, z.max = maxValue, max.size = maxSize, 
-        symbol.fg = fgCircle, symbol.bg = bgCircle, symbol.zero = F, 
-        legend.pos = legendPos, legend.breaks = legendBreaks, 
-        legend.type = legendType, legend.title = legendTitle, 
-        legend.cex = legendCex, legend.title.cex = legendTitleCex)
-    invisible()
-  }
+    library(PBSmapping)
+    data(westCoastLL)
+    data(WCstatesInlandPBS)
+    #create a fake dataset
+    datt <- data.frame(Latitude=c(42,43,44,45,46,47,runif(10,42,47)),Longitude=c(-126,-125.5,-128,-127.5,-126.5,-126.5,runif(10,-128,-125)),Z=c(1,2,3,4,5,6,rep(0,10)))
+    #plot the dataset
+    mapBubbles(datt,xlim=c(-130,-120),ylim=c(40,49),col="green4",bg="lightblue")
+    #place legend elsewhere
+    mapBubbles(datt,xlim=c(-130,-120),ylim=c(40,49),legendPos="bottomleft")
+    #nested legend with title
+    mapBubbles(datt,xlim=c(-130,-120),ylim=c(40,49),legendBreaks=c(2,6),legendType="nested",legendTitle="Abundance")
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

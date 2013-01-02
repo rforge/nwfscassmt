@@ -60,59 +60,32 @@ multiMap(nrows = 1, ncols = 1, lonLims, latLims, adjLonRange = TRUE, fnc, ...)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+    library(PBSmapping)
+    data(westCoastLL)
+    data(WCstatesInlandPBS)
+    #plot the dataset
+    multiMap(nrows=1,ncols=2,lonLims=matrix(c(-125,-125,-122,-123),nrow=2),latLims=matrix(c(42,45,45,46),nrow=2),fnc=plotMap,polys=westCoastLL)
+    multiMap(nrows=1,ncols=3,
+             lonLims=matrix(c(-123.1,-122.9,-125,-121,-125,-121),nrow=3,byrow=T),
+             latLims=matrix(c(37,40,40,45,45,48),nrow=3,byrow=T),
+             fnc=plotMap,polys=westCoastLL)
 
-## The function is currently defined as
-function (nrows = 1, ncols = 1, lonLims, latLims, adjLonRange = TRUE, 
-    fnc, ...) 
-{
-    numMaps <- nrows * ncols
-    if (ncol(latLims) != 2) 
-        stop("latLims has to have two columns for min latitude and max latitude")
-    if (ncol(lonLims) != 2) 
-        stop("lonLims has to have two columns for min longitude and max longitude")
-    if (nrow(latLims) != numMaps) 
-        stop("Need 1 row in latLims for each map panel")
-    if (nrow(lonLims) != numMaps) 
-        stop("Need 1 row in lonLims for each map panel")
-    midLat <- apply(latLims, 1, mean)
-    midLon <- apply(lonLims, 1, mean)
-    dis <- rep(NA, numMaps)
-    if (adjLonRange) {
-        for (i in 1:numMaps) {
-            dis[i] <- distance(lonLims[i, 1], midLat[i], lonLims[i, 
-                2], midLat[i])
-        }
-        for (i in 1:numMaps) {
-            diffDis <- max(dis) - dis[i]
-            lonLims[i, 1] <- uniroot(function(x, lon2, lat) {
-                distance(x, lat, lon2, lat) - diffDis/2
-            }, c(-180, lonLims[i, 1]), lon2 = lonLims[i, 1], 
-                lat = midLat[i])$root
-            lonLims[i, 2] <- uniroot(function(x, lon2, lat) {
-                distance(x, lat, lon2, lat) - diffDis/2
-            }, c(0, lonLims[i, 2]), lon2 = lonLims[i, 2], lat = midLat[i])$root
-        }
-    }
-    if (!adjLonRange) {
-        stop("adjust latitude not implemented yet\n")
-    }
-    par(mfrow = c(nrows, ncols))
-    x <- apply(latLims, 1, diff)
-    x <- which(x == max(x))
-    fnc(xlim = lonLims[x[1], ], ylim = latLims[x[1], ], ...)
-    plt1 <- par()$plt
-    par(mfrow = c(nrows, ncols))
-    for (i in 1:numMaps) {
-        fnc(xlim = lonLims[i, ], ylim = latLims[i, ], plt = NULL, 
-            ...)
-        par(plt = plt1)
-    }
-    invisible()
-  }
+    #plot using mapBubbles function
+    library(PBSmapping)
+    data(westCoastLL)
+    data(WCstatesInlandPBS)
+    #create a fake dataset
+    set.seed(55)
+    datt <- data.frame(Latitude=c(38,43,44,45,46,47,runif(100,37,47)),
+                       Longitude=c(-123.5,-125.5,-128,-127.5,-126.5,-126.5,runif(100,-128,-124)),Z=c(1,2,3,4,5,6,rep(0,100)))
+    #mapBiomass.fn(datt,xlim=c(-130,-120),ylim=c(40,49))
+    windows(height=7,width=10)
+    multiMap(nrows=1,ncols=3,
+             lonLims=matrix(c(-126,-121,-129,-122.8,-129,-122.3),nrow=3,byrow=T),
+             latLims=matrix(c(37,40,40,45,45,48),nrow=3,byrow=T),
+             fnc=mapBubbles,dat=datt,col="green4",bg="lightblue")
 }
+
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{ ~kwd1 }
