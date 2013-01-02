@@ -6,6 +6,7 @@ library(coda)
 library(superdiag)
 library(R2jags)
 library(pscl)
+library(statmod)
 load.module("glm")
 runif(1)
 
