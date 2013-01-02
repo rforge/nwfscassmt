@@ -1,0 +1,9 @@
+Package: nwfscMapping
+Type: Package
+Title: Mapping functions for NWFSC
+Version: 1.0
+Date: 2013-01-01
+Author: Allan /c /hicks
+Maintainer: allan.hicks@noaa.gov
+Description: More about what it does (maybe more than one line)
+License: What license is it under?
