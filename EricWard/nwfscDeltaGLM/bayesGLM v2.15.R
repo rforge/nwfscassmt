@@ -450,7 +450,7 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
     estimatedParameters$Estimated[which(vars==0)] = FALSE
   }
   
-  return(c(modelFit,functionCall,estimatedParameters,Species=Species))
+  return(c(modelFit,functionCall,estimatedParameters,Species=Species,Data=Data))
 
 }
 
