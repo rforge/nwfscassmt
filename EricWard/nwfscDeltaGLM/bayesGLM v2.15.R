@@ -12,6 +12,7 @@
 # v2.13 JimT added displays for processData() function regarding entries that are excluded; also fixed a bug for parallelizing 'prior.scale' option
 # v2.14 JimT fixed the ComputeMleIndices() function and added it back to doMCMCDiags(); JimT also added a warning that using non-default catchability settings will cause indices to not have the same units as a Raw (design-based) index
 # v2.15 JimT fixed another bug with ComputeMleIndices()
+# 1/2/2013: EricW added a csv file for exluded tows in processData() and attached Data to fitted model objects
 ############################################################################
 # FUNCTION processData WRITTEN BY JIM THORSON & ERIC WARD, UPDATED 9/30/2012. 
 # EMAIL: JAMES.THORSON@NOAA.GOV, ERIC.WARD@NOAA.GOV
@@ -37,7 +38,7 @@ processData = function() {
   # Exclude tows with some missing entry
   Exclude = which(apply(Data, MARGIN=1, FUN=function(Vec){any(is.na(Vec))}))
   print(paste("Excluded ",length(Exclude)," additional observations that had some missing data",sep=""))
-  write.table(Data[Exclude],"excludedTows.csv",row.names=F,col.names=T,sep=",")
+  write.table(Data[Exclude,],"excludedTows.csv",row.names=F,col.names=T,sep=",")
   if(length(Exclude) < 10 & length(Exclude) > 0) print(Data[Exclude,])
   if(length(Exclude) >= 10) print("Entries are not printed to the screen due to having 10 or more")
   if(length(Exclude) > 0) Data = Data[-Exclude,]
