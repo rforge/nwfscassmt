@@ -1152,7 +1152,7 @@ ComputeIndices = function(Data, Model, FileName, maxDims=6, Folder=NA, Weights="
     # SD of log of index (from J. Wallace "Survey.Biomass.GlmmBUGS.ver.3.00.r")
     Temp = Area[YearI,StratI] * rowSums( cMx(Chains[,YearI,,1]) * cMx(Chains[,YearI,,2]) )
     SdLogYear[YearI] = sd(log(Temp))
-  }
+  } # 1085-115
 
   # Plot MCMC chains for each Strata:Year
   for(Type in c("Trace","ACF")){
