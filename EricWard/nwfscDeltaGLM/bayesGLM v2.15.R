@@ -19,6 +19,19 @@
 ############################################################################
 processData = function() {
   
+  # Give information about necessary headers
+  if(!all(c('BEST_DEPTH_M','BEST_LAT_DD',species,'YEAR','AREA_SWEPT_MSQ','VESSEL')%in%colnames(masterDat))){
+    print("Warning: processData() terminated unsuccessfully.")
+    print("Please ensure that masterDat has the following column names")
+    print("1. BEST_DEPTH_M -> tow depth in meters")
+    print("2. BEST_LAT_DD -> tow latitude in degrees ")
+    print("3. [insert species name] -> tow catch in kilograms ")
+    print("4. YEAR -> calendar year, or time-strata")
+    print("5. AREA_SWEPT_MSQ -> area-swept in square meters, or effort offset ")
+    print("5. VESSEL -> vessel ID ")
+    stop()
+  }
+  
   # set up the generic data frame for this species
   Data = data.frame('PROJECT_CYCLE'=masterDat[,'YEAR'], 'BEST_DEPTH_M'=masterDat[,'BEST_DEPTH_M'], 'BEST_LAT_DD'=masterDat[,'BEST_LAT_DD'], 'HAUL_WT_KG'=masterDat[,which(dimnames(masterDat)[[2]]==species)], 'year'=as.factor(masterDat[,'YEAR']), 'effort'=masterDat[,'AREA_SWEPT_MSQ']*0.0001, 'VESSEL'=masterDat[,'VESSEL']) 
   Data = cbind(Data, 'y'=Data[,'HAUL_WT_KG']) 
