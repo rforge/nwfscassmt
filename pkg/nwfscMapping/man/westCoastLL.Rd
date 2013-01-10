@@ -2,14 +2,14 @@
 \alias{westCoastLL}
 \docType{data}
 \title{
-%%   ~~ West Coast Lat/Lon ... ~~
+    West Coast Lat/Lon ...
 }
 \description{
 Latitude Longitude of the West Coast
 }
 \usage{data(westCoastLL)}
 \format{
-  Latitude Longitude of the West Coast stitched together from nepacLL in PBSmapping and 
+  Latitude Longitude of the West Coast stitched together from nepacLL in PBSmapping and worldHiRes
   \describe{
     \item{\code{PID}}{a numeric vector}
     \item{\code{POS}}{a numeric vector}
