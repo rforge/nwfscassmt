@@ -93,6 +93,7 @@ mapBubbles(dat, depths = NULL, plotMap = T, maxValue = max(dat$Z), maxSize = 0.3
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
+    \dontrun{
     library(PBSmapping)
     data(westCoastLL)
     data(WCstatesInlandPBS)
@@ -104,6 +105,7 @@ mapBubbles(dat, depths = NULL, plotMap = T, maxValue = max(dat$Z), maxSize = 0.3
     mapBubbles(datt,xlim=c(-130,-120),ylim=c(40,49),legendPos="bottomleft")
     #nested legend with title
     mapBubbles(datt,xlim=c(-130,-120),ylim=c(40,49),legendBreaks=c(2,6),legendType="nested",legendTitle="Abundance")
+    }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

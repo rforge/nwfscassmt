@@ -60,6 +60,7 @@ multiMap(nrows = 1, ncols = 1, lonLims, latLims, adjLonRange = TRUE, fnc, ...)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
+    \dontrun{
     library(PBSmapping)
     data(westCoastLL)
     data(WCstatesInlandPBS)
@@ -84,6 +85,7 @@ multiMap(nrows = 1, ncols = 1, lonLims, latLims, adjLonRange = TRUE, fnc, ...)
              lonLims=matrix(c(-126,-121,-129,-122.8,-129,-122.3),nrow=3,byrow=T),
              latLims=matrix(c(37,40,40,45,45,48),nrow=3,byrow=T),
              fnc=mapBubbles,dat=datt,col="green4",bg="lightblue")
+    }
 }
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
