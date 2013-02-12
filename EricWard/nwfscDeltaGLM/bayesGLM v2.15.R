@@ -46,12 +46,16 @@ processData = function() {
   # Exclude tows from strata that are not included
   Exclude = which(is.na(Data$strata))
   print(paste("Excluded ",length(Exclude)," observations that were not assigned to any strata",sep=""))
-  if(length(Exclude) > 0) Data = Data[-Exclude,]
+  if(length(Exclude) > 0){
+    print(paste("Observations that were not assigned to any strata are shown in 'Tows_outside_strata.csv'",sep=""))  
+    write.table(Data[Exclude,],"Tows_outside_strata.csv",row.names=F,col.names=T,sep=",")
+    Data = Data[-Exclude,]
+  }
   
   # Exclude tows with some missing entry
   Exclude = which(apply(Data, MARGIN=1, FUN=function(Vec){any(is.na(Vec))}))
   print(paste("Excluded ",length(Exclude)," additional observations that had some missing data",sep=""))
-  write.table(Data[Exclude,],"excludedTows.csv",row.names=F,col.names=T,sep=",")
+  write.table(Data[Exclude,],"Tows_with_missing_data.csv",row.names=F,col.names=T,sep=",")
   if(length(Exclude) < 10 & length(Exclude) > 0) print(Data[Exclude,])
   if(length(Exclude) >= 10) print("Entries are not printed to the screen due to having 10 or more")
   if(length(Exclude) > 0) Data = Data[-Exclude,]
