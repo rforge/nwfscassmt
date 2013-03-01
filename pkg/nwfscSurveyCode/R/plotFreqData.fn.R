@@ -8,14 +8,14 @@ function(dat,inch=0.15,ylab="Bins",xlab="Year",zero2NAs=T,...) {
     dat <- dat[,-c(1:6)]
     if(gender==0) {
         #dat <- dat[,1:(ncol(dat)/2)]
-        dat <- dat[,-match("U0.1",names(dat))]
+        dat <- dat[,-match("U.999.1",names(dat))]
         #print(names(dat))
-        dat <- dat[,-match("U0",names(dat))]
+        dat <- dat[,-match("U.999",names(dat))]
         #print(names(dat))
     }
     if(gender==3) {
-        dat <- dat[,-match("F0",names(dat))]
-        dat <- dat[,-match("M0",names(dat))]
+        dat <- dat[,-match("F.999",names(dat))]
+        dat <- dat[,-match("M.999",names(dat))]
     }
     numLens <- ncol(dat)/2
     y <- as.numeric(substring(names(dat),2))
