@@ -13,6 +13,7 @@
 # v2.14 JimT fixed the ComputeMleIndices() function and added it back to doMCMCDiags(); JimT also added a warning that using non-default catchability settings will cause indices to not have the same units as a Raw (design-based) index
 # v2.15 JimT fixed another bug with ComputeMleIndices()
 # 1/2/2013: EricW added a csv file for exluded tows in processData() and attached Data to fitted model objects
+# 3/5/2013: EricW added an option for fixing the CV of positive tows at 1
 ############################################################################
 # FUNCTION processData WRITTEN BY JIM THORSON & ERIC WARD, UPDATED 9/30/2012. 
 # EMAIL: JAMES.THORSON@NOAA.GOV, ERIC.WARD@NOAA.GOV
@@ -285,7 +286,7 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   ####################################################################
   # This section is related to likelihoods
   # likelihood: lognormal, gamma, inverse gaussian
-  if(likelihood == "lognormal") {
+  if(likelihood == "lognormal" | likelihood == "lognormalFixedCV") {
   	# CV is sqrt(exp(sig2)-1) which is approx ~ sigma for sigma is small (< 0.2)
   	likelihood.string = paste("      u.nz[i] <- Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]];\n", "      y[nonZeros[i]] ~ dlnorm(u.nz[i],tau[1]);\n",sep="")
   	
@@ -295,8 +296,12 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   	}
   	
   	prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   sigma[1] <- sqrt(log(pow(CV[1],2)+1));\n   tau[1] <- pow(sigma[1],-2);\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"
+  	if(likelihood == "lognormalFixedCV") {
+  		prior.string = "   oneOverCV2[1] <- 1;\n   CV[1] <- 1;\n   CV[2] <- 0;\n   sigma[1] <- 1;\n   tau[1] <- 1;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"	
+  	}
+  	
   }
-  if(likelihood == "gamma") {
+  if(likelihood == "gamma" | likelihood == "gammaFixedCV") {
   	# gamma in this instance is parameterized in terms of the rate and shape, with mean = a/b, var = a/b2, and CV = 1/sqrt(a)
   	# So parameter 'a' has to be a constant, and 'b' varies by tows - b/c we calculate b = a/mean
     likelihood.string = paste("      u.nz[i] <- exp(min(Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]],100));\n","      b[i] <- gamma.a[1]/u.nz[i];\n","      y[nonZeros[i]] ~ dgamma(gamma.a[1],b[i]);\n")
@@ -308,9 +313,12 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   
     # for lognormal, gamma prior on 1/sigma2 = 1/CV2. To keep things consistent, gamma prior on a = 1/cv2, b/c CV = 1/sqrt(a)
     # then gamma.b[i] = gamma.a / u[i]
-  	prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   gamma.a[1] <- oneOverCV2[1];\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"   	
+  	prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   gamma.a[1] <- oneOverCV2[1];\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"
+  	if(likelihood == "gammaFixedCV") {
+  	prior.string = "   oneOverCV2[1] <- 1;\n   gamma.a[1] <- oneOverCV2[1];\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"  		
+  	}	
   }
-  if(likelihood == "invGaussian") {
+  if(likelihood == "invGaussian" | likelihood == "invGaussianFixedCV") {
   	# again, parameterize in terms of CV
   	likelihood.string = paste("      u.nz[i] <- exp(min(Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]],100));\n","      lambda[i] <- u.nz[i]*oneOverCV2[1];\n","      scaledLogLike[i] <- -(0.5*log(lambda[i]) - 0.5*logy3[nonZeros[i]] - lambda[i]*pow((y[nonZeros[i]]-u.nz[i]),2)/(2*u.nz[i]*u.nz[i]*y[nonZeros[i]])) + 10000;\n","      ones.vec[i] ~ dpois(scaledLogLike[i]);\n")
   	
@@ -320,7 +328,9 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   	} 	
   	
   	prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"	
+  	if(likelihood == "invGaussianFixedCV") prior.string = "   oneOverCV2[1] <- 1;\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"
   }
+  
   if(likelihood == "lognormalECE") {
   	# CV is sqrt(exp(sig2)-1) which is approx ~ sigma. Each tow is treated as discrete group (normal, ECE)
   	
@@ -439,8 +449,7 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   modelFit = NA
   
   if(fit.model) {
-  
-    jags.params=c("Ydev","Sdev","SYdev","VYdev","pYdev","pSdev","pSYdev","pVYdev","B.zero","B.pos","sigmaSY","sigmaVY","CV","ratio","p.ece","yearTau","strataTau","strataYearTau","vesselYearTau","C.pos","C.bin")
+jags.params=c("Ydev","Sdev","SYdev","VYdev","pYdev","pSdev","pSYdev","pVYdev","B.zero","B.pos","sigmaSY","sigmaVY","CV","ratio","p.ece","yearTau","strataTau","strataYearTau","vesselYearTau","C.pos","C.bin")
     jags.data = list("y","logy3","effort","effort2","logeffort", "logeffort2","nonZeros", "n", "isNonZeroTrawl", "nNonZeros", "nVY", "nSY", "nS", "nY", "year", "vesselYear", "strata", "strataYear","ones.vec","R","X.pos","X.bin")
   
     if(Parallel==TRUE) {
@@ -528,10 +537,13 @@ logDensity = function(obj) {
      # do the same thing with the binomial model
      avg.bin = 0
      for(j in 1:dim(Data)[1]) {
+     	# for this data point calculate posterior distribution of expectation
         exp.value = plogis(pSdev[,as.numeric(strata[j])] + pYdev[,as.numeric(year[j])] + pSYdev[,as.numeric(strataYear[j])] + pVYdev[,as.numeric(vesselYear[j])] + effort[j]*B.zero[,1] + effort2[j]*B.zero[,2])
+        # calculate log of the integral over parameters, P(y|y,theta)
 	    avg.bin[j] = log(mean(dbinom(rep(Data$isNonZeroTrawl[j],length=dim(Data)[1]),prob=exp.value,size=1)))    	
      }
-     return(sum(avg.bin)+sum(avg.pos))
+     # return(sum(avg.bin)+sum(avg.pos))
+     return(list('Presence.score'=avg.bin, 'Positive.score'=avg.pos))
 }
 
 
