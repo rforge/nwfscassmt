@@ -1276,7 +1276,7 @@ ComputeMleIndices = function(Data, Model, FileName, Folder=NA, Weights="StrataAr
     #### Positive catches
     #OffsetPos = list(ones.vec,logeffort)[[ifelse(modelStructure$Catchability.positiveTows=="one",2,1)]]
     if(Dist=="gamma") GlmPos <- glm(as.formula(paste("HAUL_WT_KG",FormulaPos)), family=Gamma(link="log"), offset=logeffort, subset=which(Data[,'HAUL_WT_KG']>0), control=glm.control(epsilon=1e-8, maxit=1000, trace=FALSE))
-    if(Dist=="lognormal") GlmPos <- lm(as.formula(paste("log(HAUL_WT_KG)",FormulaPos)), offset=OffsetPos, subset=which(Data[,'HAUL_WT_KG']>0))
+    if(Dist=="lognormal") GlmPos <- lm(as.formula(paste("log(HAUL_WT_KG)",FormulaPos)), offset=logeffort, subset=which(Data[,'HAUL_WT_KG']>0))
     
     # Calculate strata areas
     Area = matrix(NA,nrow=length(unique(StrataTable[,'year'])),ncol=length(unique(StrataTable[,'strata']))) 
