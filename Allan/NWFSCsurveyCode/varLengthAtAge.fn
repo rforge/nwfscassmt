@@ -1,0 +1,58 @@
+varLengthAtAge.fn <- function
+
+
+#cv age at length
+datL <- slwa[!is.na(slwa$AGE_YRS),]
+datLf <- datL[datL$SEX=="f",]
+datLm <- datL[datL$SEX=="m",]
+max(datLf$LENGTH_CM)
+max(datLf$AGE_YRS)
+max(datLm$LENGTH_CM)
+max(datLm$AGE_YRS)
+
+xlims <- c(0,60)
+par(mfrow=c(2,2))
+par(mar=c(5, 4, 4, 5) + 0.1)
+xf <- split(datLf$LENGTH_CM,datLf$AGE_YRS)
+xfsd <- unlist(lapply(xf,sd))
+xfcv <- xfsd/predLf[names(xfsd)]
+ages <- as.numeric(names(xfsd))
+plot(ages,xfsd,xlab="Age",ylab="SD of L@A",type="b",pch=16,lty=1,main="Females",xlim=xlims)
+par(new=T)
+plot(ages,xfcv,xlab="",ylab="",yaxt="n",type="b",pch=3,lty=2,xlim=xlims)
+axis(4)
+mtext("CV",side=4,line=2.6)
+legend("topright",c("SD","CV"),pch=c(16,3),lty=c(1,2))
+
+xm <- split(datLm$LENGTH_CM,datLm$AGE_YRS)
+xmsd <- unlist(lapply(xm,sd))
+xmcv <- xmsd/predLm[names(xmsd)]
+ages <- as.numeric(names(xmsd))
+plot(ages,xmsd,xlab="Age",ylab="SD of L@A",type="b",pch=16,lty=1,main="Males",xlim=xlims)
+par(new=T)
+plot(ages,xmcv,xlab="",ylab="",yaxt="n",type="b",pch=3,lty=2,xlim=xlims)
+axis(4)
+mtext("CV",side=4,line=2.6)
+legend("topright",c("SD","CV"),pch=c(16,3),lty=c(1,2))
+
+xf <- split(datLf$LENGTH_CM,datLf$AGE_YRS)
+xfsd <- unlist(lapply(xf,sd))
+xfcv <- xfsd/predLf[names(xfsd)]
+ages <- as.numeric(names(xfsd))
+plot(VB.fn(ages,fpar$par[1],fpar$par[2],fpar$par[3]),xfsd,xlab="Predicted Length at Age",ylab="SD of L@A",type="b",pch=16,lty=1,main="Females",xlim=xlims)
+par(new=T)
+plot(VB.fn(ages,fpar$par[1],fpar$par[2],fpar$par[3]),xfcv,xlab="",ylab="",yaxt="n",type="b",pch=3,lty=2,xlim=xlims)
+axis(4)
+mtext("CV",side=4,line=2.6)
+legend("topright",c("SD","CV"),pch=c(16,3),lty=c(1,2))
+
+xm <- split(datLm$LENGTH_CM,datLm$AGE_YRS)
+xmsd <- unlist(lapply(xm,sd))
+xmcv <- xmsd/predLm[names(xmsd)]
+ages <- as.numeric(names(xmsd))
+plot(VB.fn(ages,mpar$par[1],mpar$par[2],mpar$par[3]),xmsd,xlab="Predicted Length at Age",ylab="SD of L@A",type="b",pch=16,lty=1,main="Males",xlim=xlims)
+par(new=T)
+plot(VB.fn(ages,mpar$par[1],mpar$par[2],mpar$par[3]),xmcv,xlab="",ylab="",yaxt="n",type="b",pch=3,lty=2,xlim=xlims)
+axis(4)
+mtext("CV",side=4,line=2.6)
+legend("topright",c("SD","CV"),pch=c(16,3),lty=c(1,2))
