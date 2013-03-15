@@ -57,7 +57,13 @@ function(ages,lgthBins=1,ageBins=1,fleet="EnterFleet",season=1,partition=0,ageer
         tmpMaleUnsex <- ages$NumUnsexed - tmpFemUnsex
         ages$NumF <- ages$NumF + tmpFemUnsex
         ages$NumM <- ages$NumM + tmpMaleUnsex
-        print(unique(round(ages$sexRatio,1)))
+
+        tmpFemUnsexTally <- ages$sexRatio*ages$AgeTallyU #don't use round since these are whole numbers that are typically small (i.e., 1)
+        tmpMaleUnsexTally <- ages$AgeTallyU - tmpFemUnsexTally
+        ages$AgeTallyF <- ages$AgeTallyF + tmpFemUnsexTally
+        ages$AgeTallyM <- ages$AgeTallyM + tmpMaleUnsexTally
+
+        #print(unique(round(ages$sexRatio,1)))
     }
 
 
