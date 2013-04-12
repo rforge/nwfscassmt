@@ -2,10 +2,10 @@
 \alias{SurveyAgeAtLen.EWC.fn}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-%%  ~~function to do ... ~~
+Calculate and format age-at-length compositions
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Calculates age-at-length compositions from Early West Coast survey data and formats it for SS3.
 }
 \usage{
 SurveyAgeAtLen.EWC.fn(datAL, datTows, strat.vars = NULL, strat.df = NULL, femaleMale = c(2, 1), lgthBins = 1, ageBins = 1, SS3out = F, meanRatioMethod = T, raw = T, NAs2zero = T, season = "ENTER", fleet = "ENTER", partition = "ETNER", ageerr = "ENTER", returnSamps = F)
