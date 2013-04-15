@@ -18,7 +18,7 @@
 # FUNCTION processData WRITTEN BY JIM THORSON & ERIC WARD, UPDATED 9/30/2012. 
 # EMAIL: JAMES.THORSON@NOAA.GOV, ERIC.WARD@NOAA.GOV
 ############################################################################
-processData = function() {
+processData = function(Truncate=0) {
   
   print("Necessary column names for masterDat:")
     print("1. BEST_DEPTH_M -> tow depth in meters")
@@ -30,7 +30,7 @@ processData = function() {
   print("Please ensure that latitude and depth in strata.limits match the following boundaries:")
     print("Latitude: 42-49 in 0.5 increments")
     print("Depth (meters): 55, 75, 100, 125, 155, 183, 200, 250, 300, 350, 400, 450, 500, 549, 600, 700, 800, 900, 1000, 1100, 1200, 1280")
-
+  
   # Give information about necessary headers
   if(!all(c('BEST_DEPTH_M','BEST_LAT_DD',species,'YEAR','AREA_SWEPT_MSQ','VESSEL')%in%colnames(masterDat))){
     print("Warning: processData() terminated unsuccessfully.")
@@ -40,6 +40,10 @@ processData = function() {
   
   # set up the generic data frame for this species
   Data = data.frame('PROJECT_CYCLE'=masterDat[,'YEAR'], 'BEST_DEPTH_M'=masterDat[,'BEST_DEPTH_M'], 'BEST_LAT_DD'=masterDat[,'BEST_LAT_DD'], 'HAUL_WT_KG'=masterDat[,which(dimnames(masterDat)[[2]]==species)], 'year'=as.factor(masterDat[,'YEAR']), 'effort'=masterDat[,'AREA_SWEPT_MSQ']*0.0001, 'VESSEL'=masterDat[,'VESSEL']) 
+  if(Truncate>0){
+    print(paste("Changing any observation with less than ",Truncate," kilograms to 0 kilograms",sep=""))
+    Data[,'HAUL_WT_KG'] = ifelse( Data[,'HAUL_WT_KG']<Truncate, 0, Data[,'HAUL_WT_KG'] )
+  }
   Data = cbind(Data, 'y'=Data[,'HAUL_WT_KG']) 
   Data = cbind(Data, 'strata'=apply(masterDat,1,strata.fn,Strata.df=strata.limits))
   Data = cbind(Data, 'isNonZeroTrawl'=ifelse(Data[,'y']>0,1,0))
