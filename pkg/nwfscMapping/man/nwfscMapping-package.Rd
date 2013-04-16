@@ -4,8 +4,7 @@
 \docType{package}
 \title{Mapping tools for NWFSC survey data}
 \description{
-More about what it does (maybe more than one line)
-~~ A concise (1-5 lines) description of the package ~~
+Some mapping tools for NWFSC assessments
 }
 \details{
     \tabular{ll}{
