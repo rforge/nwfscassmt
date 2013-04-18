@@ -1124,7 +1124,7 @@ ComputeIndices = function(Data, Model, FileName, maxDims=6, Folder=NA, Weights="
   
   # New objects
   Chains = array(NA,dim=c(nrow(Sdev),length(unique(StrataTable[,'year'])),length(unique(StrataTable[,'strata'])),2))
-  Year = Strata = Area = PosMedian = PresMedian = IndexMedian = IndexMedianWeighted = PosMean = PresMean = IndexMean = IndexMeanWeighted = CvMedian = SdLog = RawPos = RawPres = Raw = RawWeighted = matrix(NA,nrow=length(unique(StrataTable[,'year'])),ncol=length(unique(StrataTable[,'strata']))) 
+  Year = Strata = Area = PosMedian = PresMedian = IndexMedian = IndexMedianWeighted = PosMean = PresMean = IndexMean = IndexMeanWeighted = CvMedian = SdLog = RawPos = RawPres = Raw = RawWeighted = RawVar = RawVarWeighted = RawCV = matrix(NA,nrow=length(unique(StrataTable[,'year'])),ncol=length(unique(StrataTable[,'strata']))) 
   CvMedianYear = SdLogYear = rep(NA,length(unique(StrataTable[,'year'])))
   
   # Calculate values
@@ -1183,6 +1183,9 @@ ComputeIndices = function(Data, Model, FileName, maxDims=6, Folder=NA, Weights="
       RawPres[YearI,StratI] = mean(Data[Which,'HAUL_WT_KG']>0)    
       Raw[YearI,StratI] = RawPos[YearI,StratI] * RawPres[YearI,StratI]
       RawWeighted[YearI,StratI] = Raw[YearI,StratI] * Area[YearI,StratI]
+      RawVar[YearI,StratI] = var(Data[Which,'HAUL_WT_KG']/Data[Which,'effort'],na.rm=TRUE) / length(Which) 
+      RawVarWeighted[YearI,StratI] = RawVar[YearI,StratI] * Area[YearI,StratI]^2 
+      RawCV[YearI,StratI] = sqrt( RawVarWeighted[YearI,StratI] ) / RawWeighted[YearI,StratI] 
     }
     # CV of median (from J. Wallace "Survey.Biomass.GlmmBUGS.ver.3.00.r")
     Temp = Area[YearI,StratI] * rowSums( cMx(Chains[,YearI,,1]) * cMx(Chains[,YearI,,2]) )
@@ -1221,8 +1224,8 @@ ComputeIndices = function(Data, Model, FileName, maxDims=6, Folder=NA, Weights="
   }
   
   # Compile into matrices
-  Results1 = data.frame(Year=as.vector(Year), Strata=as.vector(Strata), Raw=as.vector(RawWeighted), IndexMedian=as.vector(IndexMedianWeighted), IndexMean=as.vector(IndexMeanWeighted), CvMedian=as.vector(CvMedian), SdLog=as.vector(SdLog), Area=as.vector(Area), PosMedian=as.vector(PosMedian), PresMedian=as.vector(PresMedian), PosMean=as.vector(PosMean), PresMean=as.vector(PresMean), RawPos=as.vector(RawPos), RawPres=as.vector(RawPres))
-  Results2 = data.frame(Year=Year[,1], Raw=rowSums(RawWeighted,na.rm=TRUE), IndexMedian=rowSums(IndexMedianWeighted,na.rm=TRUE), IndexMean=rowSums(IndexMeanWeighted,na.rm=TRUE), CvMedian=CvMedianYear, SdLog=SdLogYear)
+  Results1 = data.frame(Year=as.vector(Year), Strata=as.vector(Strata), Raw=as.vector(RawWeighted), RawCV=as.vector(RawCV), IndexMedian=as.vector(IndexMedianWeighted), IndexMean=as.vector(IndexMeanWeighted), CvMedian=as.vector(CvMedian), SdLog=as.vector(SdLog), Area=as.vector(Area), PosMedian=as.vector(PosMedian), PresMedian=as.vector(PresMedian), PosMean=as.vector(PosMean), PresMean=as.vector(PresMean), RawPos=as.vector(RawPos), RawPres=as.vector(RawPres), RawSD=ifelse(as.vector(RawVarWeighted)==0,NA,as.vector(sqrt(RawVarWeighted))))
+  Results2 = data.frame(Year=Year[,1], Raw=rowSums(RawWeighted,na.rm=TRUE), RawCV=sqrt(rowSums(RawVarWeighted,na.rm=TRUE))/rowSums(RawWeighted,na.rm=TRUE), IndexMedian=rowSums(IndexMedianWeighted,na.rm=TRUE), IndexMean=rowSums(IndexMeanWeighted,na.rm=TRUE), CvMedian=CvMedianYear, SdLog=SdLogYear)
   
   # Detach stuff -- listed by search()
   #detach(Data)
