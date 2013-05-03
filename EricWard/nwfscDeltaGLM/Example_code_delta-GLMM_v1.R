@@ -42,8 +42,8 @@ processData()
 mcmc.control = list(chains=2, thin=2, burnin=2e3, iterToSave=2e3)
 #Parallel = TRUE   # If having trouble, try turning off parallel
 Parallel = FALSE   # If having trouble, try turning off parallel
-modelStructure1 = list("StrataYear.positiveTows"="fixed", "VesselYear.positiveTows"="random", "StrataYear.zeroTows"="fixed", "VesselYear.zeroTows"="random", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
-#modelStructure1 = list("StrataYear.positiveTows"="fixed", "VesselYear.positiveTows"="fixed", "StrataYear.zeroTows"="fixed", "VesselYear.zeroTows"="fixed", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
+#modelStructure1 = list("StrataYear.positiveTows"="fixed", "VesselYear.positiveTows"="random", "StrataYear.zeroTows"="fixed", "VesselYear.zeroTows"="random", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
+modelStructure1 = list("StrataYear.positiveTows"="fixed", "VesselYear.positiveTows"="zero", "StrataYear.zeroTows"="fixed", "VesselYear.zeroTows"="zero", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
 #modelStructure2 = list("StrataYear.positiveTows"="correlated", "VesselYear.positiveTows"="correlated", "StrataYear.zeroTows"="correlated", "VesselYear.zeroTows"="correlated", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
 
 # Define models
