@@ -634,7 +634,7 @@ PlotData = function(Data, FileName, Folder=NA){
   
   # Histogram of positive catch | year
   Ncol = ceiling(sqrt(Nyears)); Nrow = ceiling(Nyears/Ncol)
-  jpeg(paste(Folder,FileName,"Positive catch BY Year.jpg",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
+  png(paste(Folder,FileName,"Positive catch BY Year.png",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
     par(mfrow=c(Nrow,Ncol), mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02, oma=c(4,4,0,0))
     for(YearI in 1:Nyears){
       Which = which(Pos[,'PROJECT_CYCLE']==unique(Pos[,'PROJECT_CYCLE'])[YearI])
@@ -646,7 +646,7 @@ PlotData = function(Data, FileName, Folder=NA){
   
   # Scatterplot of positive catch by depth
   Ncol = Nrow = 1
-  jpeg(paste(Folder,FileName,"Positive catch and depth.jpg",sep=""),width=Ncol*4,height=Nrow*4,units="in",res=200)
+  png(paste(Folder,FileName,"Positive catch and depth.png",sep=""),width=Ncol*4,height=Nrow*4,units="in",res=200)
     par(mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02)
     Y = Pos[,'HAUL_WT_KG']
     plot(x=Pos[,'BEST_DEPTH_M'], y=ifelse(Y==0,NA,Y), log="y", main="Positive catch by depth", xlab="Depth", ylab="Positive catch rates", pch=20, col=rgb(0,0,0,alpha=0.2))
@@ -655,7 +655,7 @@ PlotData = function(Data, FileName, Folder=NA){
   
   # Scatterplot of positive catch by depth | Year
   Ncol = ceiling(sqrt(Nyears)); Nrow = ceiling(Nyears/Ncol)
-  jpeg(paste(Folder,FileName,"Positive catch and depth BY Year.jpg",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
+  png(paste(Folder,FileName,"Positive catch and depth BY Year.png",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
     par(mfrow=c(Nrow,Ncol), mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02, oma=c(4,4,0,0))
     for(YearI in 1:Nyears){
       Which = which(Pos[,'PROJECT_CYCLE']==unique(Pos[,'PROJECT_CYCLE'])[YearI])
@@ -671,7 +671,7 @@ PlotData = function(Data, FileName, Folder=NA){
   
   # Scatterplot of positive catch by lattitude
   Ncol = Nrow = 1
-  jpeg(paste(Folder,FileName,"Positive catch and latitude.jpg",sep=""),width=Ncol*4,height=Nrow*4,units="in",res=200)
+  png(paste(Folder,FileName,"Positive catch and latitude.png",sep=""),width=Ncol*4,height=Nrow*4,units="in",res=200)
     par(mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02)
     Y = Pos[,'HAUL_WT_KG']
     plot(x=Pos[,'BEST_LAT_DD'], y=ifelse(Y==0,NA,Y), log="y", main="Positive catch by Latitude", xlab="Latitude", ylab="Positive catch rates", pch=20, col=rgb(0,0,0,alpha=0.2))
@@ -680,7 +680,7 @@ PlotData = function(Data, FileName, Folder=NA){
 
   # Scatterplot of positive catch by lattitude | Year
   Ncol = ceiling(sqrt(Nyears)); Nrow = ceiling(Nyears/Ncol)
-  jpeg(paste(Folder,FileName,"Positive catch and latitude BY Year.jpg",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
+  png(paste(Folder,FileName,"Positive catch and latitude BY Year.png",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
     par(mfrow=c(Nrow,Ncol), mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02, oma=c(4,4,0,0))
     for(YearI in 1:Nyears){
       Which = which(Pos[,'PROJECT_CYCLE']==unique(Pos[,'PROJECT_CYCLE'])[YearI])
@@ -694,7 +694,7 @@ PlotData = function(Data, FileName, Folder=NA){
   
   # Bar graph of proportion positive by year
   Ncol = Nrow = 1
-  jpeg(paste(Folder,FileName,"Presence and year.jpg",sep=""),width=Ncol*4,height=Nrow*4,units="in",res=200)
+  png(paste(Folder,FileName,"Presence and year.png",sep=""),width=Ncol*4,height=Nrow*4,units="in",res=200)
     par(mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02)
     SumPres = tapply(Data[,'Pres'],INDEX=Data[,'PROJECT_CYCLE'],FUN=sum,na.rm=TRUE)
     SumAbs = tapply(1-Data[,'Pres'],INDEX=Data[,'PROJECT_CYCLE'],FUN=sum,na.rm=TRUE)
@@ -707,7 +707,7 @@ PlotData = function(Data, FileName, Folder=NA){
   # Bar graph of proportion positive by 25 meter depth bins | Year
   Ncol = ceiling(sqrt(Nyears)); Nrow = ceiling(Nyears/Ncol)
   BinWidth = 50
-  jpeg(paste(Folder,FileName,"Presence and depth BY year.jpg",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
+  png(paste(Folder,FileName,"Presence and depth BY year.png",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
     par(mfrow=c(Nrow,Ncol), mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02, oma=c(4,4,0,0))
     for(YearI in 1:Nyears){
       Which = which(Data[,'PROJECT_CYCLE']==unique(Data[,'PROJECT_CYCLE'])[YearI])
@@ -724,7 +724,7 @@ PlotData = function(Data, FileName, Folder=NA){
   # Bar graph of proportion positive by 1 degree latitude bins | Year
   Ncol = ceiling(sqrt(Nyears)); Nrow = ceiling(Nyears/Ncol)
   BinWidth = 1
-  jpeg(paste(Folder,FileName,"Presence and latitude BY year.jpg",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
+  png(paste(Folder,FileName,"Presence and latitude BY year.png",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
     par(mfrow=c(Nrow,Ncol), mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02, oma=c(4,4,0,0))
     for(YearI in 1:Nyears){
       Which = which(Data[,'PROJECT_CYCLE']==unique(Data[,'PROJECT_CYCLE'])[YearI])
@@ -746,7 +746,7 @@ PlotData = function(Data, FileName, Folder=NA){
 MapData = function(Data, SA3, strata.limits, FileName, Folder){
 
   # Distilled from line 426-539 of "Survey.Biomass.GlmmBUGS.ver.3.00.R" from John Wallace's code
-  jpeg(file=paste(Folder,FileName,"TowMap.jpg",sep=""),width=8,height=8,res=200,units="in")
+  png(file=paste(Folder,FileName,"TowMap.png",sep=""),width=8,height=8,res=200,units="in")
 
     # Draw box
     plot(c(-55, -1280), c(32, 50.5), xlab = "Depth (m)", ylab = "Latitude", xlim=c(-1280, -55), ylim=c(32, 49), type = "n")
@@ -811,7 +811,7 @@ ConvergencePlot = function(McmcArray, maxDims=8, parToMonitor, parnames, Nkeep=5
       ParSet = (PlotI-1)*maxDims^2 + 1:min(Nparam-(PlotI-1)*maxDims^2,maxDims^2)
         Ncol=ceiling(sqrt(length(ParSet)))
         Nrow = ceiling(length(ParSet)/Ncol)
-      jpeg(paste(Folder,FileName,"",Type,"_",PlotI,".jpg",sep=""),width=Ncol*1.5,height=Nrow*1.5,units="in",res=150)
+      png(paste(Folder,FileName,"",Type,"_",PlotI,".png",sep=""),width=Ncol*1.5,height=Nrow*1.5,units="in",res=150)
         par(mfrow=c(Nrow,Ncol), mar=c(0,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02)
         for(ParI in 1:length(ParSet)){
           if(Type=="Trace"){
@@ -833,7 +833,7 @@ ConvergencePlot = function(McmcArray, maxDims=8, parToMonitor, parnames, Nkeep=5
     ParSet = grep("sigma",parnames)
     Ncol=ceiling(sqrt(length(ParSet)))
       Nrow = ceiling(length(ParSet)/Ncol)
-    jpeg(paste(Folder,FileName,"Variance_density.jpg",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
+    png(paste(Folder,FileName,"Variance_density.png",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
       par(mfrow=c(Nrow,Ncol), mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02)
       for(ParI in 1:length(ParSet)){
         plot(x=-999,y=-999,,main=parnames[ParSet[ParI]],xlab="",ylab="",xlim=range(McmcArray[,,parToMonitor[ParSet[ParI]]]),ylim=c(0,10/diff(range(McmcArray[,,parToMonitor[ParSet[ParI]]])))) 
@@ -860,7 +860,7 @@ ConvergencePlot = function(McmcArray, maxDims=8, parToMonitor, parnames, Nkeep=5
     	}    	
     }
     plotNames = c("Strata-Year","Vessel-Year","strata","year")
-    jpeg(paste(Folder,FileName,"Correlation_density.jpg",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
+    png(paste(Folder,FileName,"Correlation_density.png",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
       par(mfrow=c(Nrow,Ncol), mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02)
     # create a new subdataset from just the correlations
     for(par in 1:kept) {
@@ -887,7 +887,7 @@ McmcDiagnosticsPlot = function(McmcList, parToMonitor, FileName, Folder=NA, Gewe
   if(is.na(Folder)) Folder = paste(getwd(),"/",sep="")  
 
   # Plot
-  jpeg(paste(Folder,FileName,"Gelman_points.jpg",sep=""),width=6,height=6,units="in",res=200)
+  png(paste(Folder,FileName,"Gelman_points.png",sep=""),width=6,height=6,units="in",res=200)
     par(mfrow=c(1,1))
     # all points below 1.05 shown as points, all above given names
     mycols = rep("black",length(GelmanDiag$psrf[,1]))
@@ -900,7 +900,7 @@ McmcDiagnosticsPlot = function(McmcList, parToMonitor, FileName, Folder=NA, Gewe
   dev.off()
   
   # Plot histograms showing Gelman-Rubin scores
-  jpeg(paste(Folder,FileName,"Gelman_histograms.jpg",sep=""),width=5,height=10,units="in",res=200)
+  png(paste(Folder,FileName,"Gelman_histograms.png",sep=""),width=5,height=10,units="in",res=200)
     par(mfrow=c(2,1),mai=c(0.5,0.5,0.2,0.2))
     hist(GelmanDiag$psrf[,1],xlab="psrf",main="Gelman: point estimate")
     hist(GelmanDiag$psrf[,2],xlab="psrf",main="Gelman: upper C.I.")
@@ -909,7 +909,7 @@ McmcDiagnosticsPlot = function(McmcList, parToMonitor, FileName, Folder=NA, Gewe
   # plot the geweke diagnostic   -- OFTEN DOESN"T CONVERGE
   if(Geweke==TRUE){
     GewekeDiag = geweke.diag(McmcList[,parToMonitor])
-    jpeg(paste(Folder,FileName,"Geweke.jpg",sep=""),width=8,height=8,units="in",res=200)
+    png(paste(Folder,FileName,"Geweke.png",sep=""),width=8,height=8,units="in",res=200)
       par(mfrow=c(3,1),mai=c(0.5,0.5,0.2,0.2))
       for(i in 1:3) {
       	plot(unlist(GewekeDiag[[i]]), xlab=paste("Parameter, chain: ",i),ylab="Geweke Z-score",ylim=c(-3,3))
@@ -945,7 +945,7 @@ PlotOffset = function(Data, BugsList, maxDims=8, FileName, Folder=NA){
     ParSet = (PlotI-1)*maxDims^2 + 1:min(Nstrat-(PlotI-1)*maxDims^2,maxDims^2)
     Ncol=ceiling(sqrt(length(ParSet)))
     Nrow = ceiling(length(ParSet)/Ncol)
-    jpeg(paste(Folder,"/",FileName,"Offset_Positive_by_strata_",PlotI,".jpg",sep=""),width=Ncol*1.5,height=Nrow*1.5,res=150,units="in")
+    png(paste(Folder,"/",FileName,"Offset_Positive_by_strata_",PlotI,".png",sep=""),width=Ncol*1.5,height=Nrow*1.5,res=150,units="in")
       par(mfrow=c(Nrow,Ncol), mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02)
       for(StrataYearI in ParSet){
         StrataI = strata[which(strataYear==unique(strataYear)[StrataYearI])[1]]
@@ -964,7 +964,7 @@ PlotOffset = function(Data, BugsList, maxDims=8, FileName, Folder=NA){
     ParSet = (PlotI-1)*maxDims^2 + 1:min(Nstrat-(PlotI-1)*maxDims^2,maxDims^2)
     Ncol=ceiling(sqrt(length(ParSet)))
     Nrow = ceiling(length(ParSet)/Ncol)
-    jpeg(paste(Folder,"/",FileName,"Offset_Presence-Absence_by_strata_",PlotI,".jpg",sep=""),width=Ncol*1.5,height=Nrow*1.5,res=150,units="in")
+    png(paste(Folder,"/",FileName,"Offset_Presence-Absence_by_strata_",PlotI,".png",sep=""),width=Ncol*1.5,height=Nrow*1.5,res=150,units="in")
       par(mfrow=c(Nrow,Ncol), mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02)
       for(StrataYearI in ParSet){
         StrataI = strata[which(strataYear==unique(strataYear)[StrataYearI])[1]]
@@ -1053,7 +1053,7 @@ PosteriorPredictive = function(Data, Model, maxDims=6, FileName, Folder=NA){
     ParSet = (PlotI-1)*maxDims^2 + 1:min(Nstrat-(PlotI-1)*maxDims^2,maxDims^2)
     Ncol=ceiling(sqrt(length(ParSet)))
     Nrow = ceiling(length(ParSet)/Ncol)
-    jpeg(paste(Folder,"/",FileName,"Posterior_Predictive_",PlotI,".jpg",sep=""),width=Ncol*1.5,height=Nrow*1.5,res=200,units="in")
+    png(paste(Folder,"/",FileName,"Posterior_Predictive_",PlotI,".png",sep=""),width=Ncol*1.5,height=Nrow*1.5,res=200,units="in")
       par(mfrow=c(Nrow,Ncol), mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02)
       for(StrataYearI in ParSet){
         Which = which(strataYear[nonZeros]==unique(strataYear[nonZeros])[StrataYearI])
@@ -1094,7 +1094,7 @@ PosteriorPredictive = function(Data, Model, maxDims=6, FileName, Folder=NA){
   }
   
   # Q-Q plot
-  jpeg(paste(Folder,"/",FileName,"Q-Q_plot.jpg",sep=""),width=4,height=4,res=200,units="in")
+  png(paste(Folder,"/",FileName,"Q-Q_plot.png",sep=""),width=4,height=4,res=200,units="in")
     par(mfrow=c(1,1), mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02)
     Qtemp = na.omit(Q)
     Order = order(Qtemp)
@@ -1204,7 +1204,7 @@ ComputeIndices = function(Data, Model, FileName, maxDims=6, Folder=NA, Weights="
         ParSet = (PlotI-1)*maxDims^2 + 1:min(Nstrat-(PlotI-1)*maxDims^2,maxDims^2)
         Ncol=ceiling(sqrt(length(ParSet)))
         Nrow = ceiling(length(ParSet)/Ncol)
-        jpeg(paste(Folder,"/",FileName,"Chain_",c("Positive","Presence")[ChainI],"_",Type,"_by_StrataYear_",PlotI,".jpg",sep=""),width=Ncol*1.5,height=Nrow*1.5,res=150,units="in")
+        png(paste(Folder,"/",FileName,"Chain_",c("Positive","Presence")[ChainI],"_",Type,"_by_StrataYear_",PlotI,".png",sep=""),width=Ncol*1.5,height=Nrow*1.5,res=150,units="in")
           par(mfrow=c(Nrow,Ncol), mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02)
           for(StrataYearI in ParSet){
             StrataI = strata[which(strataYear==unique(strataYear)[StrataYearI])[1]]
@@ -1425,7 +1425,7 @@ doMCMCDiags = function(directory, mods, McmcDiagnostics=FALSE) {
     }
     
     # Compare JAGS and MLE
-    jpeg(paste(Folder,"/","","Index_Comparison.jpg",sep=""),width=2*3,height=2*3,res=200,units="in")
+    png(paste(Folder,"/","","Index_Comparison.png",sep=""),width=2*3,height=2*3,res=200,units="in")
       par(mfrow=c(2,2), mar=c(2.5,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02)
       matplot(cbind(McmcIndices$Results1[,c('PresMedian','RawPres')], MleIndices$Results1$Pres), col=c("black","red","blue"), lty="solid", type="l", xlab="Strata and/or Year", ylab="Index or component",main="StrataYear Presence", ylim=c(0,max(cbind(McmcIndices$Results1[,c('PresMedian','RawPres')], MleIndices$Results1$Pres),na.rm=TRUE)))
       matplot(cbind(McmcIndices$Results1[,c('PosMedian','RawPos')], MleIndices$Results1$Pos), col=c("black","red","blue"), lty="solid", type="l", xlab="Strata and/or Year", ylab="Index or component",main="StrataYear Positive catch", ylim=c(0,max(cbind(McmcIndices$Results1[,c('PosMedian','RawPos')], MleIndices$Results1$Pos),na.rm=TRUE)))
@@ -1444,7 +1444,7 @@ doMCMCDiags = function(directory, mods, McmcDiagnostics=FALSE) {
   }
   
   # Plot Index and CV for all model configurations
-  jpeg(paste(SpeciesFolder,"Index_Comparison.jpg",sep=""),width=1*4,height=2*4,res=200,units="in")
+  png(paste(SpeciesFolder,"Index_Comparison.png",sep=""),width=1*4,height=2*4,res=200,units="in")
     par(mfrow=c(2,1), mgp=c(1.25,0.25,0), mar=c(3,3,1,0), tck=-0.02)
     matplot(Indices[,,1], col="black", lty="solid", type="b", xlab="Year", ylab="Biomass index", ylim=c(0,max(Indices[,,1],na.rm=T)))
     matplot(Indices[,,2], col="black", lty="solid", type="b", xlab="Year", ylab="Index CV", ylim=c(0,max(Indices[,,2],na.rm=T)))
@@ -1452,7 +1452,7 @@ doMCMCDiags = function(directory, mods, McmcDiagnostics=FALSE) {
   
   # Plot Index and CV | Strata for all model configurations
   Log = ""
-  jpeg(paste(SpeciesFolder,"Index_Comparison_by_strata.jpg",sep=""),width=2*3,height=nlevels(strata)*3,res=200,units="in")
+  png(paste(SpeciesFolder,"Index_Comparison_by_strata.png",sep=""),width=2*3,height=nlevels(strata)*3,res=200,units="in")
     par(mfrow=c(nlevels(strata),2), mgp=c(1.25,0.25,0), mar=c(3,3,1,0), tck=-0.02, oma=c(0,2,2,0))
     for(StratI in 1:nlevels(strata)){  
       matplot(IndicesByStrata[,StratI,,1], col="black", log=Log, lty="solid", type="b", xlab="Year", ylab="Biomass index", ylim=list( c(0,max(IndicesByStrata[,,,1])), range(IndicesByStrata[,,,1]) )[[ifelse(Log=="",1,2)]])
@@ -1463,4 +1463,19 @@ doMCMCDiags = function(directory, mods, McmcDiagnostics=FALSE) {
     }
   dev.off()
 
+  # Plot deviance distribution for all configurations
+  png(paste(SpeciesFolder,"Comparison_Posterior_Deviance.png",sep=""),width=1*5,height=1*5,res=200,units="in")
+    par(mgp=c(1.25,0.25,0), mar=c(3,3,1,0), tck=-0.02)
+    Deviance = sapply(mods, FUN=function(List){List$BUGSoutput$sims.list$deviance[,1]})
+    D = apply(Deviance, MARGIN=2, FUN=density)
+    Ymax = sapply(D, FUN=function(List){max(List$y)})
+    plot(density(mods[[1]]$BUGSoutput$sims.list$deviance), ylab="Density", xlab="Deviance", main="Posterior deviance", col=rainbow(length(mods))[1], xlim=quantile(Deviance, prob=c(0.001,0.999)), ylim=c(0,max(Ymax)))
+    if(length(mods)>1){
+      for(i in 1:length(mods)){
+        lines(density(mods[[i]]$BUGSoutput$sims.list$deviance), col=rainbow(length(mods))[i])
+      }
+    }
+    legend("topleft",fill=rainbow(length(mods)), legend=paste("Model",1:length(mods)))
+  dev.off()
+  
 }
