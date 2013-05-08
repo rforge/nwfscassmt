@@ -55,3 +55,8 @@ mods[[1]] = fitCPUEModel(modelStructure=modelStructure1, mcmc.control=mcmc.contr
 # Process MCMC output
 # Make sure that Data is attached prior to running
 doMCMCDiags(my.wd,mods)
+
+# Extract DIC:
+# SEE NWFSC Assessment Handbook for reasons why J. Thorson and E. Ward think DIC is inappropriate: 
+# https://docs.google.com/a/noaa.gov/document/d/1KhQs8Q6q8iPDKdTjEvM7k4t3v0FIWBZmJsJKSMeXSXo/edit#heading=h.4iwd0uxza7v9
+mods[[1]]$BUGSoutput$DIC
