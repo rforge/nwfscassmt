@@ -738,6 +738,16 @@ PlotData = function(Data, FileName, Folder=NA){
     mtext("Proportion positive",outer=TRUE,line=2,side=2,cex=2)
   dev.off()  
   
+  # Scatterplot of mean-variance relationship for each strata-year combination
+  png(paste(Folder,FileName,"Mean-Variance_for_each_Strata-Year.png",sep=""),width=5,height=5,units="in",res=200)
+    par(mar=c(3,3,3,0), mgp=c(1.25,0.25,0), tck=-0.02)
+    SY_mean = log( tapply(Data[,'HAUL_WT_KG']/Data[,'effort'], FUN=mean, INDEX=Data[,'strataYear']) )
+    SY_var = log( tapply(Data[,'HAUL_WT_KG']/Data[,'effort'], FUN=var, INDEX=Data[,'strataYear']) )
+    plot(x=SY_mean, y=SY_var, xlab="ln(mean)", ylab="ln(var)", main="Mean-variance relationship for \neach strata-year combination")
+    abline(a=0,b=1, lty="solid")
+    abline(a=0,b=2, lty="dotted")
+  dev.off()  
+  
 }
 
 ##########
@@ -1323,6 +1333,34 @@ ComputeMleIndices = function(Data, Model, FileName, Folder=NA, Weights="StrataAr
   return(list(Results1=Results1, Results2=Results2))
 }    
     
+#########
+# Compute MLE index of abundance
+#########
+VesselEffects = function(Model, FileName, Folder=NA){
+
+  # Make folder
+  if(is.na(Folder)) Folder = paste(getwd(),"/",sep="")  
+  
+  # Plot vessel effects
+  for(PlotI in 1:2){
+    png(paste(Folder,"/","","Vessel_effect_",c("Positive","Presence-absence")[PlotI],".png",sep=""),width=5,height=5,res=200,units="in")
+      par(mar=c(3,3,1,0), mgp=c(1.5,0.5,0), tck=-0.02)
+      if(PlotI==1) VarName="VYdev"               # Positive catches
+      if(PlotI==2) VarName="pVYdev"               # Presence/absence
+      if( (PlotI==1 & Model$modelStructure$VesselYear.positiveTows=="random") | (PlotI==2 & Model$modelStructure$VesselYear.zeroTows=="random") ){
+        VY_mean = colMeans(Model$BUGSoutput$sims.list[[VarName]])
+        Unique = unique(Data$vesselYear)
+        Match = match(Unique, Data$vesselYear)
+        VY_year = Data$year[Match]
+        VY_vessel = Data$VESSEL[Match]
+        #plot(x=VY_year, y=VY_mean, col=rainbow(length(unique(VY_vessel)))[factor(VY_vessel)], pch=(1:length(unique(VY_vessel)))[factor(VY_vessel)])    
+        plot(x=as.numeric(as.character(VY_year)), y=VY_mean, pch=1:length(VY_mean)%%10, xlab="Year", ylab="Vessel effect", type="p")
+        abline(h=0, lty="dotted")
+      } 
+    dev.off()
+  }
+}
+
 
 ########################################################
 ####### This block of code is related to processing output
@@ -1416,6 +1454,8 @@ doMCMCDiags = function(directory, mods, McmcDiagnostics=FALSE) {
     PlotOffset(Data=Data, BugsList=BugsList, FileName="", Folder=Folder)
     # Posterior predictive distribution for positive catches
     PosteriorPredictive(Data=Data, Model=Model, FileName="", Folder=Folder)
+    # Plot vessel effects
+    VesselEffects(Model=Model, FileName="", Folder=Folder)
     # JAGS indices of abundance
     McmcIndices = ComputeIndices(Data=Data, Model=Model, FileName="", Folder=Folder, Weights=c("StrataAreas","Equal")[1], StrataTable=StrataTable)
     # MLE indices of abundance
@@ -1444,10 +1484,21 @@ doMCMCDiags = function(directory, mods, McmcDiagnostics=FALSE) {
   }
   
   # Plot Index and CV for all model configurations
-  png(paste(SpeciesFolder,"Index_Comparison.png",sep=""),width=1*4,height=2*4,res=200,units="in")
-    par(mfrow=c(2,1), mgp=c(1.25,0.25,0), mar=c(3,3,1,0), tck=-0.02)
-    matplot(Indices[,,1], col="black", lty="solid", type="b", xlab="Year", ylab="Biomass index", ylim=c(0,max(Indices[,,1],na.rm=T)))
-    matplot(Indices[,,2], col="black", lty="solid", type="b", xlab="Year", ylab="Index CV", ylim=c(0,max(Indices[,,2],na.rm=T)))
+  png(paste(SpeciesFolder,"Index_Comparison.png",sep=""),width=6,height=6,res=200,units="in")
+    par(mfrow=c(1,1), mgp=c(1.5,0.25,0), mar=c(3,3,1,0), tck=-0.02)
+    PlotMat = McmcIndices$Results2[,c('Year','Raw','RawCV')]
+    for(ModelNumber in 1:length(mods)) PlotMat = cbind(PlotMat, Indices[,ModelNumber,])
+    Ymax = max(exp( log(PlotMat[,-1][,seq(1,ncol(PlotMat[,-1]),by=2)]) + PlotMat[,-1][,seq(2,ncol(PlotMat[,-1]),by=2)] )) * 1.2
+    plot(1, type="n", xlim=range(as.numeric(as.character(PlotMat$Year))), ylim=c(0,Ymax), xlab="Year", ylab="Biomass (kg.)")
+    legend("topleft", fill=rainbow(length(mods)+1), legend=c("Design",paste("Model",1:length(mods))), ncol=3)
+    for(ModelNumber in 1:(length(mods)+1)){
+    for(YearI in 1:nrow(PlotMat)){
+      X = as.numeric(as.character(PlotMat$Year[YearI]))+seq(-0.2,0.2,length=length(mods)+1)[ModelNumber]
+      points(x=X, y=PlotMat[YearI,2+(ModelNumber-1)*2], col=rainbow(length(mods)+1)[ModelNumber])
+      lines(x=rep(X,2), y=exp( log(PlotMat[YearI,2+(ModelNumber-1)*2]) + c(-1,1)*PlotMat[YearI,3+(ModelNumber-1)*2] ), col=rainbow(length(mods)+1)[ModelNumber])
+    }}
+    #matplot(Indices[,,1], col="black", lty="solid", type="b", xlab="Year", ylab="Biomass index", ylim=c(0,max(Indices[,,1],na.rm=T)))
+    #matplot(Indices[,,2], col="black", lty="solid", type="b", xlab="Year", ylab="Index CV", ylim=c(0,max(Indices[,,2],na.rm=T)))
   dev.off()
   
   # Plot Index and CV | Strata for all model configurations
@@ -1479,3 +1530,5 @@ doMCMCDiags = function(directory, mods, McmcDiagnostics=FALSE) {
   dev.off()
   
 }
+
+
