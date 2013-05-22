@@ -1517,7 +1517,7 @@ doMCMCDiags = function(directory, mods, McmcDiagnostics=FALSE) {
   # Plot deviance distribution for all configurations
   png(paste(SpeciesFolder,"Comparison_Posterior_Deviance.png",sep=""),width=1*5,height=1*5,res=200,units="in")
     par(mgp=c(1.25,0.25,0), mar=c(3,3,1,0), tck=-0.02)
-    Deviance = sapply(mods, FUN=function(List){List$BUGSoutput$sims.list$deviance[,1]})
+    Deviance = sapply(mods, FUN=function(List){as.matrix(List$BUGSoutput$sims.list$deviance,ncol=1)[,1]})
     D = apply(Deviance, MARGIN=2, FUN=density)
     Ymax = sapply(D, FUN=function(List){max(List$y)})
     plot(density(mods[[1]]$BUGSoutput$sims.list$deviance), ylab="Density", xlab="Deviance", main="Posterior deviance", col=rainbow(length(mods))[1], xlim=quantile(Deviance, prob=c(0.001,0.999)), ylim=c(0,max(Ymax)))
