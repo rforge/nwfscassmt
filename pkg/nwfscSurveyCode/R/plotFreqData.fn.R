@@ -13,7 +13,8 @@ function(dat,inch=0.15,ylab="Bins",xlab="Year",zero2NAs=T,...) {
         dat <- dat[,-match("U.999",names(dat))]
         #print(names(dat))
     }
-    if(gender==3) {
+    if(gender==3 & length(grep(".999",names(dat)))>0) {
+        # exclude columns for fish below minimum bin
         dat <- dat[,-match("F.999",names(dat))]
         dat <- dat[,-match("M.999",names(dat))]
     }

@@ -11,6 +11,9 @@ function(file,headerRow=7,sep=",",
     if(length(colNames) == ncol(xx)) {
         names(xx) <- colNames
         cat("NOTE: column names have been modified from the csv file. You may want to verify that they match.\n")
+    }else{
+      cat("NOTE: column names have not been changed because 'colNames' input does not match number of columns.\n",
+          "     some functions might not work as a result.\n")
     }
     return(xx)
 }
