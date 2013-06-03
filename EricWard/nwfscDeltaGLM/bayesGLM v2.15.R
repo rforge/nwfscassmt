@@ -1485,17 +1485,21 @@ doMCMCDiags = function(directory, mods, McmcDiagnostics=FALSE) {
   
   # Plot Index and CV for all model configurations
   png(paste(SpeciesFolder,"Index_Comparison.png",sep=""),width=6,height=6,res=200,units="in")
-    par(mfrow=c(1,1), mgp=c(1.5,0.25,0), mar=c(3,3,1,0), tck=-0.02)
+    par(mfrow=c(1,1), mgp=c(1.5,0.25,0), mar=c(3,3,1,0.1), tck=-0.02)
     PlotMat = McmcIndices$Results2[,c('Year','Raw','RawCV')]
     for(ModelNumber in 1:length(mods)) PlotMat = cbind(PlotMat, Indices[,ModelNumber,])
     Ymax = max(exp( log(PlotMat[,-1][,seq(1,ncol(PlotMat[,-1]),by=2)]) + PlotMat[,-1][,seq(2,ncol(PlotMat[,-1]),by=2)] )) * 1.2
-    plot(1, type="n", xlim=range(as.numeric(as.character(PlotMat$Year))), ylim=c(0,Ymax), xlab="Year", ylab="Biomass (kg.)")
-    legend("topleft", fill=rainbow(length(mods)+1), legend=c("Design",paste("Model",1:length(mods))), ncol=3)
+    plot(1, type="n", xlim=range(as.numeric(as.character(PlotMat$Year)))+c(-0.2,0.2), ylim=c(0,Ymax), xlab="Year", ylab="Biomass (kg.)", yaxs="i")
+    # define colors 
+    colvec <- rainbow(length(mods)+1)[ModelNumber]
+    # for figures with two colors, the cyan looks lame, so changing that
+    if(length(colvec)==2) colvec <- c("red","blue")
+    legend("topleft", fill=colvec, legend=c("Design",paste("Model",1:length(mods))), ncol=min(length(mods)+1,3))
     for(ModelNumber in 1:(length(mods)+1)){
     for(YearI in 1:nrow(PlotMat)){
       X = as.numeric(as.character(PlotMat$Year[YearI]))+seq(-0.2,0.2,length=length(mods)+1)[ModelNumber]
-      points(x=X, y=PlotMat[YearI,2+(ModelNumber-1)*2], col=rainbow(length(mods)+1)[ModelNumber])
-      lines(x=rep(X,2), y=exp( log(PlotMat[YearI,2+(ModelNumber-1)*2]) + c(-1,1)*PlotMat[YearI,3+(ModelNumber-1)*2] ), col=rainbow(length(mods)+1)[ModelNumber])
+      points(x=X, y=PlotMat[YearI,2+(ModelNumber-1)*2], col=colvec)
+      lines(x=rep(X,2), y=exp( log(PlotMat[YearI,2+(ModelNumber-1)*2]) + c(-1,1)*PlotMat[YearI,3+(ModelNumber-1)*2] ), col=colvec[ModelNumber])
     }}
     #matplot(Indices[,,1], col="black", lty="solid", type="b", xlab="Year", ylab="Biomass index", ylim=c(0,max(Indices[,,1],na.rm=T)))
     #matplot(Indices[,,2], col="black", lty="solid", type="b", xlab="Year", ylab="Index CV", ylim=c(0,max(Indices[,,2],na.rm=T)))
