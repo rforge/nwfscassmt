@@ -88,7 +88,7 @@ SigOpt = c(3,-1,3,-3)
 
 # Define minimum and maximum ages for integral across unobserved ages
 MinAge = 1
-MaxAge = ceiling(max(AgeReads2)/10)*10
+MaxAge = ceiling(max(AgeReads2[,-1])/10)*10
 
 # Run the model 
   #Data=AgeReads2; SigOpt=SigOpt; BiasOpt=BiasOpt; NDataSets=1; MinAge=MinAge; MaxAge=MaxAge; RefAge=10; MinusAge=1; PlusAge=30; MaxSd=40; MaxExpectedAge=MaxAge+10; SaveFile=DateFile; AdmbFile=SourceFile; EffSampleSize=0; Intern=TRUE
