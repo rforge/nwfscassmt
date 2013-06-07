@@ -171,8 +171,8 @@ PlotOutputFn = function(Data, MaxAge, SaveFile, PlotType="PDF"){
       Plot()
     dev.off()
   }
-  if(PlotType=="JPG"){
-    jpeg(paste(SaveFile,"Estimated vs Observed Age Structure.jpg",sep=""),width=6,height=6,units="in",res=200)
+  if(PlotType=="PNG"){
+    png(paste(SaveFile,"Estimated vs Observed Age Structure.png",sep=""),width=6,height=6,units="in",res=200)
       Plot()
     dev.off()
   }
@@ -199,8 +199,8 @@ PlotOutputFn = function(Data, MaxAge, SaveFile, PlotType="PDF"){
       Plot()
     dev.off()
   }
-  if(PlotType=="JPG"){
-    jpeg(paste(SaveFile,"True vs Reads (by reader).jpg",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
+  if(PlotType=="PNG"){
+    png(paste(SaveFile,"True vs Reads (by reader).png",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
       Plot()
     dev.off()
   }
