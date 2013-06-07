@@ -24,7 +24,7 @@ rMx=function(Input){
 ####################
 # Run model
 ####################
-RunFn = function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, MinusAge, PlusAge, MaxSd, MaxExpectedAge, SaveFile, EffSampleSize=0, Intern=TRUE, AdmbFile=NULL, JustWrite=FALSE){
+RunFn = function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, MinusAge, PlusAge, MaxSd, MaxExpectedAge, SaveFile, EffSampleSize=0, Intern=TRUE, AdmbFile=NULL, JustWrite=FALSE, CallType="system"){
 
   # Copy ADMB file 
   if(!is.null(AdmbFile)) file.copy(from=paste(AdmbFile,"agemat.exe",sep=""), to=paste(SaveFile,"agemat.exe",sep=""), overwrite=TRUE)
@@ -103,8 +103,8 @@ RunFn = function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, Minus
   # Run ADMB file
   if(JustWrite==FALSE){
     setwd(SaveFile)
-    #Output = shell("agemat.exe -est",intern=Intern)
-    Output = system("agemat.exe -est",intern=Intern)
+    if(CallType=="shell") Output = shell(paste(SaveFile,"agemat.exe -est",sep=""),intern=Intern)
+    if(CallType=="system") Output = system(paste(SaveFile,"agemat.exe -est",sep=""),intern=Intern)
     Admb = scan(paste(SaveFile,"agemat.par",sep=""),comment.char="#",quiet=TRUE)
   }
 }
@@ -164,7 +164,7 @@ PlotOutputFn = function(Data, MaxAge, SaveFile, PlotType="PDF"){
   Plot = function(){
     par(mar=c(3,3,2,0),mgp=c(1.5,0.25,0),tck=-0.02,oma=c(0,0,0,0)+0.1)
     plot(x=AgeStruct[,1],y=AgeStruct[,2],type="s",lwd=2,xlab="Age",ylab="Prop",main="Estimated=Black, Observed=Red")
-    hist(ifelse(Data[,-1]==-999,NA,Data[,-1]),add=TRUE,freq=FALSE,breaks=seq(0,MaxAge,by=1),col=rgb(red=1,green=0,blue=0,alpha=0.30))
+    hist(ifelse(Data[,-1]==-999,NA,Data[,-1]*outer(Data[,1],rep(1,ncol(Data)-1))),add=TRUE,freq=FALSE,breaks=seq(0,MaxAge,by=1),col=rgb(red=1,green=0,blue=0,alpha=0.30))
   }
   if(PlotType=="PDF"){
     pdf(paste(SaveFile,"Estimated vs Observed Age Structure.pdf",sep=""),width=6,height=6)
