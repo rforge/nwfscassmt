@@ -7,14 +7,15 @@
 #################
 
 # This is where the R code for functions is located
-SourceFile = "C:\\Users\\James Thorson\\Desktop\\UW Hideaway\\Ageing error\\Distribution\\"
+SourceFile = "C:/Users/James.Thorson/Desktop/NWFSC_SVN/JimThor/AgeingError/"
   source(paste(SourceFile,"Fn_Run_and_plot_model.r",sep=""))
   source(paste(SourceFile,"Fn_Simulate_data.r",sep=""))
   source(paste(SourceFile,"Fn_stepwise_model_builder.r",sep=""))
 
 # This is where all runs will be located
-DateFile = paste(SourceFile,Sys.Date(),"\\",sep="")
+DateFile = paste(SourceFile,Sys.Date(),"/",sep="")
   dir.create(DateFile)
+  setwd(DateFile)
 
 #############################
 #
@@ -91,8 +92,8 @@ MinAge = 1
 MaxAge = ceiling(max(AgeReads2[,-1])/10)*10
 
 # Run the model 
-  #Data=AgeReads2; SigOpt=SigOpt; BiasOpt=BiasOpt; NDataSets=1; MinAge=MinAge; MaxAge=MaxAge; RefAge=10; MinusAge=1; PlusAge=30; MaxSd=40; MaxExpectedAge=MaxAge+10; SaveFile=DateFile; AdmbFile=SourceFile; EffSampleSize=0; Intern=TRUE
-RunFn(Data=AgeReads2, SigOpt=SigOpt, BiasOpt=BiasOpt, NDataSets=1, MinAge=MinAge, MaxAge=MaxAge, RefAge=10, MinusAge=1, PlusAge=30, SaveFile=DateFile, AdmbFile=SourceFile, EffSampleSize=0, Intern=FALSE, JustWrite=FALSE)
+  #Data=AgeReads2; SigOpt=SigOpt; BiasOpt=BiasOpt; NDataSets=1; MinAge=MinAge; MaxAge=MaxAge; RefAge=10; MinusAge=1; PlusAge=30; SaveFile=DateFile; AdmbFile=SourceFile; EffSampleSize=0; Intern=FALSE; JustWrite=FALSE; CallType="system"
+RunFn(Data=AgeReads2, SigOpt=SigOpt, BiasOpt=BiasOpt, NDataSets=1, MinAge=MinAge, MaxAge=MaxAge, RefAge=10, MinusAge=1, PlusAge=30, SaveFile=DateFile, AdmbFile=SourceFile, EffSampleSize=0, Intern=FALSE, JustWrite=FALSE, CallType="system")
                  
 # Plot output
   #Data=AgeReads2; MaxAge=MaxAge; SaveFile=DateFile; PlotType="PDF"
