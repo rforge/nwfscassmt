@@ -1,4 +1,4 @@
-Package: NLTS
+Package: nwfscNLTS
 Type: Package
 Title: Non-linear time series
 Version: 1.0
