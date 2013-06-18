@@ -1,0 +1,9 @@
+Package: NLTS
+Type: Package
+Title: Non-linear time series
+Version: 1.0
+Date: 2012-11-15
+Author: James Thorson
+Maintainer: James Thorson <JamesT.esq+nlts@gmail.com>
+Description: This package includes implementations of simplex and S-map algorithms for projecting time series data in the presence of non-linear (state-dependent) dynamics 
+License: GPL-2
