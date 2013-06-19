@@ -27,6 +27,9 @@ plotFreqData.fn(dat, inch = 0.15, ylab = "Bins", xlab = "Year", zero2NAs = T, ..
   \item{zero2NAs}{
 %%     ~~Describe \code{zero2NAs} here~~
 }
+  \item{main}{
+%%     ~~Describe \code{zero2NAs} here~~
+}
   \item{\dots}{
 %%     ~~Describe \code{\dots} here~~
 }
@@ -59,7 +62,7 @@ plotFreqData.fn(dat, inch = 0.15, ylab = "Bins", xlab = "Year", zero2NAs = T, ..
 \examples{
 %##---- Should be DIRECTLY executable !! ----
 %##-- ==>  Define data, use random,
-%##--	or do  help(data=index)  for the standard data sets.
+%##--   or do  help(data=index)  for the standard data sets.
  
 %## The function is currently defined as
 %function (dat, inch = 0.15, ylab = "Bins", xlab = "Year", zero2NAs = T, 
