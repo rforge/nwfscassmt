@@ -1493,12 +1493,12 @@ doMCMCDiags = function(directory, mods, McmcDiagnostics=FALSE) {
     # define colors 
     colvec <- rainbow(length(mods)+1)[ModelNumber]
     # for figures with two colors, the cyan looks lame, so changing that
-    if(length(colvec)==2) colvec <- c("red","blue")
+    if(length(length(mods))==1) colvec <- c("red","blue")
     legend("topleft", fill=colvec, legend=c("Design",paste("Model",1:length(mods))), ncol=min(length(mods)+1,3))
     for(ModelNumber in 1:(length(mods)+1)){
     for(YearI in 1:nrow(PlotMat)){
       X = as.numeric(as.character(PlotMat$Year[YearI]))+seq(-0.2,0.2,length=length(mods)+1)[ModelNumber]
-      points(x=X, y=PlotMat[YearI,2+(ModelNumber-1)*2], col=colvec)
+      points(x=X, y=PlotMat[YearI,2+(ModelNumber-1)*2], col=colvec[ModelNumber])
       lines(x=rep(X,2), y=exp( log(PlotMat[YearI,2+(ModelNumber-1)*2]) + c(-1,1)*PlotMat[YearI,3+(ModelNumber-1)*2] ), col=colvec[ModelNumber])
     }}
     #matplot(Indices[,,1], col="black", lty="solid", type="b", xlab="Year", ylab="Biomass index", ylim=c(0,max(Indices[,,1],na.rm=T)))
