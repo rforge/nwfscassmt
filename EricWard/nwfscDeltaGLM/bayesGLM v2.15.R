@@ -1485,15 +1485,15 @@ doMCMCDiags = function(directory, mods, McmcDiagnostics=FALSE) {
   
   # Plot Index and CV for all model configurations
   png(paste(SpeciesFolder,"Index_Comparison.png",sep=""),width=6,height=6,res=200,units="in")
-    par(mfrow=c(1,1), mgp=c(1.5,0.25,0), mar=c(3,3,1,0.1), tck=-0.02)
+    par(mfrow=c(1,1), mgp=c(1.5,0.25,0), mar=c(3,3,1,1), tck=-0.02)
     PlotMat = McmcIndices$Results2[,c('Year','Raw','RawCV')]
     for(ModelNumber in 1:length(mods)) PlotMat = cbind(PlotMat, Indices[,ModelNumber,])
     Ymax = max(exp( log(PlotMat[,-1][,seq(1,ncol(PlotMat[,-1]),by=2)]) + PlotMat[,-1][,seq(2,ncol(PlotMat[,-1]),by=2)] )) * 1.2
     plot(1, type="n", xlim=range(as.numeric(as.character(PlotMat$Year)))+c(-0.2,0.2), ylim=c(0,Ymax), xlab="Year", ylab="Biomass (kg.)", yaxs="i")
     # define colors 
-    colvec <- rainbow(length(mods)+1)[ModelNumber]
+    colvec <- rainbow(length(mods)+1)
     # for figures with two colors, the cyan looks lame, so changing that
-    if(length(length(mods))==1) colvec <- c("red","blue")
+    if(length(mods)==1) colvec <- c("red","blue")
     legend("topleft", fill=colvec, legend=c("Design",paste("Model",1:length(mods))), ncol=min(length(mods)+1,3))
     for(ModelNumber in 1:(length(mods)+1)){
     for(YearI in 1:nrow(PlotMat)){
