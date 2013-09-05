@@ -11,7 +11,7 @@ function(bio,CI=0.95,scalar=1e6,gap=0.03,ylab="Biomass ('000 mt)",xlab="Year",yl
     logB <- log(bio$Value)
     ci <- exp(rbind(c(logB+qnorm(1-(1-CI)/2)*se),c(logB-qnorm(1-(1-CI)/2)*se)))/scalar
     if(is.null(ylim)) {
-        ylim <- c(0,1.05*max(ci))
+        ylim <- c(0,1.05*max(ci,na.rm=TRUE))
     }
     
     gap <- gap*max(y)

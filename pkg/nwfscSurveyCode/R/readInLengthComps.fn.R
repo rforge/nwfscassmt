@@ -13,7 +13,10 @@ function(file,headerRow=7,sep=",",
         cat("NOTE: column names have been modified from the csv file. You may want to verify that they match.\n")
     }else{
       cat("NOTE: column names have not been changed because 'colNames' input does not match number of columns.\n",
-          "     some functions might not work as a result.\n")
+          "     some functions might not work as a result.\n",
+          "     length(colNames):",length(colNames),"   columns in input file:",ncol(xx),"\n",
+          "     First row of input file:\n")
+      print(head(xx,1))
     }
     return(xx)
 }

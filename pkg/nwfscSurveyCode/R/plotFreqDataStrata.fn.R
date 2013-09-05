@@ -7,14 +7,17 @@ function(dat,inch=0.15,ylab="Bins",xlab="",zero2NAs=T,...) {
     xlabels <- as.character(dat$year)
     gender <- dat$gender[1]
     dat <- dat[,-c(1:6)]
-    if(gender==0) {
+    if(length(grep(".999",names(dat))>0)){
+      # remove extra columns (if the user didn't remove them already)
+      if(gender==0) {
         #dat <- dat[,1:(ncol(dat)/2)]
         dat <- dat[,-match("U.999.1",names(dat))]
         dat <- dat[,-match("U.999",names(dat))]
-    }
-    if(gender==3) {
+      }
+      if(gender==3) {
         dat <- dat[,-match("F.999",names(dat))]
         dat <- dat[,-match("M.999",names(dat))]
+      }
     }
     numLens <- ncol(dat)/2
     y <- as.numeric(substring(names(dat),2))
