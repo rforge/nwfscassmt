@@ -8,7 +8,8 @@
  Read in the csv file of biomass observations from the Early West Coast surveys. Omit foreign hauls and filter by species, if desired.
 }
 \usage{
-ReadInBiomass.EWC.fn(dataFile, directory, species = c(NA), removeCAN = T, verbose = F)
+ReadInBiomass.EWC.fn(dataFile, directory, species = c(NA), removeCAN =
+T, verbose = F, foreignfile="foreign_hauls.csv")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,6 +27,9 @@ ReadInBiomass.EWC.fn(dataFile, directory, species = c(NA), removeCAN = T, verbos
 }
   \item{verbose}{
     Logical indicating whether to provide additional messages to the screen. Default FALSE.
+}
+  \item{foreignfile}{
+    Name of CSV file containing information on hauls in Canada. Default "foreign_hauls.csv".
 }
 }
 \details{
