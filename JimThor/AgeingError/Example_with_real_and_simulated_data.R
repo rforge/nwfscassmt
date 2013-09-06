@@ -7,13 +7,15 @@
 #################
 
 # This is where the R code for functions is located
-SourceFile = "C:/Users/James.Thorson/Desktop/NWFSC_SVN/JimThor/AgeingError/"
+#SourceFile = "C:/Users/James.Thorson/Desktop/NWFSC_SVN/JimThor/AgeingError/"
+SourceFile = "C:/Users/James.Thorson/Desktop/UW Hideaway/Collaborations/Spline ageing error/"
   source(paste(SourceFile,"Fn_Run_and_plot_model.r",sep=""))
   source(paste(SourceFile,"Fn_Simulate_data.r",sep=""))
   source(paste(SourceFile,"Fn_stepwise_model_builder.r",sep=""))
 
 # This is where all runs will be located
-DateFile = paste(SourceFile,Sys.Date(),"/",sep="")
+#DateFile = paste(SourceFile,Sys.Date(),"/",sep="")
+  DateFile = paste(SourceFile,"2013-09-06B/",sep="")
   dir.create(DateFile)
   setwd(DateFile)
 
@@ -76,7 +78,7 @@ for(RowI in 2:nrow(AgeReads)){
 # 0 = Unbiased (at least 1 reader has to be)
 # 1 = Linear bias
 # 2 = Curvilinear bias (3 param)
-BiasOpt = c(0,-1,2,-3)
+BiasOpt = c(0,-1,0,-3)
 
 # Generate vector with settings for SD 
 # One entry for each reader
@@ -85,15 +87,18 @@ BiasOpt = c(0,-1,2,-3)
 # 1 = Constant coefficient of variation
 # 2 = Curvilinear standard deviation (3 param)
 # 3 = Curvilinear coefficient of variation (3 param)
-SigOpt = c(3,-1,3,-3)
+# 5 = Spline with estimated slope at beginning and end (Number of params = 2 + number of knots)
+# 6 = Linear interpolation (1st knot must be 1 and last knot must be MaxAge)
+SigOpt = c(1,-1,6,-3)
+KnotAges = list(NA, NA, c(1,10,20,40), NA)  # Necessary for option 5 or 6
 
 # Define minimum and maximum ages for integral across unobserved ages
 MinAge = 1
 MaxAge = ceiling(max(AgeReads2[,-1])/10)*10
 
 # Run the model 
-  #Data=AgeReads2; SigOpt=SigOpt; BiasOpt=BiasOpt; NDataSets=1; MinAge=MinAge; MaxAge=MaxAge; RefAge=10; MinusAge=1; PlusAge=30; SaveFile=DateFile; AdmbFile=SourceFile; EffSampleSize=0; Intern=FALSE; JustWrite=FALSE; CallType="system"
-RunFn(Data=AgeReads2, SigOpt=SigOpt, BiasOpt=BiasOpt, NDataSets=1, MinAge=MinAge, MaxAge=MaxAge, RefAge=10, MinusAge=1, PlusAge=30, SaveFile=DateFile, AdmbFile=SourceFile, EffSampleSize=0, Intern=FALSE, JustWrite=FALSE, CallType="system")
+  #Data=AgeReads2; SigOpt=SigOpt; KnotAges=KnotAges; BiasOpt=BiasOpt; NDataSets=1; MinAge=MinAge; MaxAge=MaxAge; RefAge=10; MinusAge=1; PlusAge=30; SaveFile=DateFile; AdmbFile=SourceFile; EffSampleSize=0; Intern=FALSE; JustWrite=FALSE; CallType="shell"
+RunFn(Data=AgeReads2, SigOpt=SigOpt, KnotAges=KnotAges, BiasOpt=BiasOpt, NDataSets=1, MinAge=MinAge, MaxAge=MaxAge, RefAge=10, MinusAge=1, PlusAge=30, SaveFile=DateFile, AdmbFile=SourceFile, EffSampleSize=0, Intern=FALSE, JustWrite=FALSE, CallType="shell")
                  
 # Plot output
   #Data=AgeReads2; MaxAge=MaxAge; SaveFile=DateFile; PlotType="PDF"

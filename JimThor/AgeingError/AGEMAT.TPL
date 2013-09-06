@@ -1,6 +1,9 @@
 GLOBALS_SECTION
   #include <admodel.h>
   #include <time.h>
+  #include <fvar.hpp>
+  dvar_vector spline(const dvector &_x,const dvar_vector&_y,dvariable yp1,
+    dvariable ypn);
   time_t start,finish;
   long hour,minute,second;
   double elapsed_time;
@@ -27,7 +30,7 @@ DATA_SECTION
  int IDcnt;
  int MaxCells
 
- !! cout << "Age-reading estimation; September 2011" << endl;
+ !! cout << "Age-reading estimation; September 2013" << endl;
  
  init_int MaxReader;
  !! EchoFile << "# Maximum readers: " << MaxReader << endl;
@@ -69,7 +72,7 @@ DATA_SECTION
  !!   Nreads(IDataS) = 0; Iperfect(IDataS) = 0;
  !!   for (int II=1; II<=Nread(IDataS);II++)
  !!    {
- !!     if (ReadPnt(IDataS,II) > 0) 
+ !!     if (ReadPnt(IDataS,II) > 0)
  !!      {
  !!        Nreads(IDataS) += 1;
  !!        if (SigOpt(ReadPnt(IDataS,II)) == 4) Iperfect(IDataS) = II;
@@ -106,8 +109,41 @@ DATA_SECTION
  !!   if (SigOpt(Ireader) == 2) NumSig += 3;
  !!   if (SigOpt(Ireader) == 3) NumSig += 3; 
  !!  }
- !! EchoFile << "Number of variance parameters " << NumSig << endl;
  
+ // parameters defining Sigmas (Spline)
+ matrix xvals(1,MaxReader,1,100);
+ ivector nknots(1,MaxReader);
+ !! for (Ireader = 1; Ireader <=MaxReader; Ireader++)
+ !!  if (SigOpt(Ireader) == 5)
+ !!   {
+ !!    *(ad_comm::global_datafile) >> nknots(Ireader);
+ !!    NumSig = NumSig + nknots(Ireader) + 2;
+ !!    for (IDcnt=1;IDcnt<=nknots(Ireader);IDcnt++) *(ad_comm::global_datafile) >> xvals(Ireader,IDcnt);
+ !!    EchoFile << "Spline used to define SD for reader " << Ireader << endl;
+ !!    EchoFile << "Selected knots are located at ";
+ !!    for (IDcnt=1;IDcnt<=nknots(Ireader);IDcnt++) EchoFile << xvals(Ireader,IDcnt) << " ";
+ !!    EchoFile << endl;
+ !!   } 
+
+ // parameters defining Sigmas (Linear Interpolation)
+ imatrix xvalsL(1,MaxReader,1,100);
+ ivector nknotsL(1,MaxReader);
+ !! for (Ireader = 1; Ireader <=MaxReader; Ireader++)
+ !!  if (SigOpt(Ireader) == 6)
+ !!   {
+ !!    *(ad_comm::global_datafile) >> nknotsL(Ireader);
+ !!    NumSig = NumSig + nknotsL(Ireader);
+ !!    for (IDcnt=1;IDcnt<=nknotsL(Ireader);IDcnt++) *(ad_comm::global_datafile) >> xvalsL(Ireader,IDcnt);
+ !!    if (xvalsL(Ireader,1) != 1) { cout << "First age must be 1" << endl; exit(1); }
+ !!    if (xvalsL(Ireader,nknotsL(Ireader)) != MaxAge) { cout << "last age must be MaxAge" << endl; exit(1); }
+ !!    EchoFile << "Linear interpolation used to define SD for reader " << Ireader << endl;
+ !!    EchoFile << "Selected knots are located at ";
+ !!    for (IDcnt=1;IDcnt<=nknotsL(Ireader);IDcnt++) EchoFile << xvalsL(Ireader,IDcnt) << " ";
+ !!    EchoFile << endl;
+ !!   } 
+
+ !! EchoFile << "Number of variance parameters " << NumSig << endl;
+
  // Parameters defining Sigmas
  vector Sigma_LO(1,NumSig); 
  vector Sigma_HI(1,NumSig); 
@@ -115,7 +151,7 @@ DATA_SECTION
  ivector Sigma_Phase(1,NumSig); 
  !! for (IDcnt=1;IDcnt<= NumSig;IDcnt++) 
  !!  *(ad_comm::global_datafile) >> Sigma_LO(IDcnt) >> Sigma_HI(IDcnt) >> Sigma_INIT(IDcnt) >> Sigma_Phase(IDcnt);
-  
+    
  // Bounds and phases for the probability parameters
  init_number Prob_Low;
  init_number Prob_Hi;
@@ -172,7 +208,8 @@ DATA_SECTION
  !! Nfunction = 0;
 
  ivector Ages(1,MaxReader);
-
+ vector AgesR(1,MaxReader);
+ vector x(1,10);
  int PhaseDummy;
  !! PhaseDummy = -1;
 
@@ -227,7 +264,7 @@ PRELIMINARY_CALCS_SECTION
    for (JJ=1;JJ<=NumSig;JJ++) SDPar(JJ) = Sigma_INIT(JJ);
    for (JJ=1;JJ<=NumBias;JJ++) BiasPar(JJ) = Bias_INIT(JJ);
    for (JJ=1;JJ<=Nslops;JJ++) Slope(JJ) = Slope_INIT(JJ);  
-
+   
    // Initialize the proportion parameters
    Jpnt = 0;
    for (IDataSet=1;IDataSet<=NDataSet;IDataSet++)
@@ -384,12 +421,12 @@ PROCEDURE_SECTION
 // ===========================================================================
 
 FUNCTION  Create_Bias_and_CV   
- int Ireader,Ioff,Ioff3,Ioff4,IestRead;
+ int Ireader,Ioff,Ioff3,Ioff4,IestRead,II,Iknot;
  int Age1,AgeA,BiasOption,SigOption;
- dvariable Temp,Par1,Par2,Par3,Mult;
+ dvariable Temp,Par1,Par2,Par3,Mult,ypn,yp1;
  
  // Specify the year-specific biases
- Ioff = 1; IestRead = MaxReader-1;
+ Ioff = 1; IestRead = MaxReader-1; 
  for (Ireader=1;Ireader<=MaxReader;Ireader++) 
   {
    BiasOption = BiasOpt(Ireader);
@@ -480,13 +517,51 @@ FUNCTION  Create_Bias_and_CV
    // No error
    if (SigOption == 4)
     for (Age1=0;Age1<=MaxAge;Age1++) TheSD(Ireader,Age1) = 0;
+
+   // Spline Parameters relate to the CV
+   if (SigOption == 5)
+    {
+     dvector x(1,nknots(Ireader));
+     dvar_vector VyI(1,nknots(Ireader));
+     for (II = 1; II<=nknots(Ireader);II++) 
+      { x(II) = xvals(Ireader,II); VyI(II) = mfexp(SDPar(Ioff+II-1)); } 
+     Ioff += nknots(Ireader);
+     yp1 = SDPar(Ioff);
+     ypn = SDPar(Ioff+1);
+     Ioff += 2;
+     dvar_vector ders = spline(x,VyI,yp1,ypn);
+     for (Age1=0;Age1<=MaxAge;Age1++)
+      {
+       if (Age1 == 0) AgeA = 1; else AgeA = Age1; 
+       TheSD(Ireader,Age1) = sqrt(square(splint(x,VyI,ders,float(AgeA))));
+      } 
+    }
    
+   // Linear interpolation
+   if (SigOption == 6)
+    {
+     dvector x(1,nknotsL(Ireader));
+     dvar_vector VyI(1,nknotsL(Ireader));
+     for (II = 1; II<=nknotsL(Ireader);II++) 
+      { x(II) = float(xvalsL(Ireader,II)); VyI(II) = mfexp(SDPar(Ioff+II-1)); } 
+     Ioff += nknotsL(Ireader);
+     for (Iknot=1;Iknot<=nknotsL(Ireader)-1;Iknot++)
+      {
+       Par1 = (VyI(Iknot+1)-VyI(Iknot))/(x(Iknot+1)-x(Iknot));
+       Par2 = VyI(Iknot) - Par1*x(Iknot);
+       for (Age1=xvalsL(Ireader,Iknot);Age1<xvalsL(Ireader,Iknot+1);Age1++)
+        TheSD(Ireader,Age1) = Par2 + Par1*float(Age1);
+      }
+     TheSD(Ireader,MaxAge) = Par2 + Par1*float(MaxAge); 
+     TheSD(Ireader,0) = TheSD(Ireader,1);
+    }
+    
    // Save results
    for (Age1=0;Age1<=MaxAge;Age1++)
     AllOut((Ireader-1)*(MaxAge+1)+Age1+1) = TheSD(Ireader,Age1);
      
   }  
-
+   
 // ===========================================================================
 
 FUNCTION cumd_norm2
@@ -772,6 +847,7 @@ REPORT_SECTION
     report << endl;
    }
   cout << "Completed the Report Section" << endl;
+
 
 // ===========================================================================
 

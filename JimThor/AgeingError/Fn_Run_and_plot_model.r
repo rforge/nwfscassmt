@@ -24,13 +24,19 @@ rMx=function(Input){
 ####################
 # Run model
 ####################
-RunFn = function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, MinusAge, PlusAge, MaxSd, MaxExpectedAge, SaveFile, EffSampleSize=0, Intern=TRUE, AdmbFile=NULL, JustWrite=FALSE, CallType="system"){
+RunFn = function(Data, SigOpt, KnotAges, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, MinusAge, PlusAge, MaxSd, MaxExpectedAge, SaveFile, EffSampleSize=0, Intern=TRUE, AdmbFile=NULL, JustWrite=FALSE, CallType="system"){
 
   # Copy ADMB file 
   if(!is.null(AdmbFile)) file.copy(from=paste(AdmbFile,"agemat.exe",sep=""), to=paste(SaveFile,"agemat.exe",sep=""), overwrite=TRUE)
   
+  # Check for errors
+  Nreaders = ncol(Data)-1
+  for(ReaderI in 1:Nreaders){
+    if( (SigOpt[ReaderI]==5 | SigOpt[ReaderI]==6) & is.na(KnotAges[[ReaderI]][1]) ) stop("Must specify KnotAges for any reader with SigOpt 5 or 6")
+  } 
+  
   # Write DAT file
-  write(c("# Maximum number of readers",ncol(Data)-1),file=paste(SaveFile,"agemat.dat",sep=""))
+  write(c("# Maximum number of readers",Nreaders),file=paste(SaveFile,"agemat.dat",sep=""))
     write(c("# Number of data sets",NDataSets),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE)
     write(c("# Number of points per data set",nrow(Data)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE)
     write(c("# Readers per data set",ncol(Data)-1),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE)
@@ -47,16 +53,21 @@ RunFn = function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, Minus
     write.table(rMx(SigOpt),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,row.names=FALSE,col.names=FALSE)
     write(c("# Option for effective sample size",EffSampleSize),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE)
     write(c("# Use Par File (1=Yes)",0),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE) 
+  # Write knots related to splines
+    write("\n# Number and location of knots for any splines",file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE)
+    for(ReaderI in 1:Nreaders){
+      if(SigOpt[ReaderI]==5 | SigOpt[ReaderI]==6) write.table( rMx(c(length(KnotAges[[ReaderI]]),KnotAges[[ReaderI]])), file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE) 
+    }
   # Write initial values  
     # Bias 
     write("\n# Min, Max, Init, Phase for Bias",file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE)
-    for(BiasI in 1:length(BiasOpt)){
+    for(BiasI in 1:Nreaders){
       # No bias
       if(BiasOpt[BiasI]<=0){}
       # Linear bias
       if(BiasOpt[BiasI]==1) write.table(rMx(c(0.001,3,1,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
       # Curvilinear bias = 0.5+Par1 + (Par3-Par1)/(1.0-mfexp(-Par2*(float(MaxAge)-1)))*(1.0-mfexp(-Par2*(float(Age1)-1)))
-      # Starting value must be non-zero
+      # Starting value must be non-zero        
       if(BiasOpt[BiasI]==2){
         write.table(rMx(c(0.001,10,1,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
         write.table(rMx(c(-10,1,0.01,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
@@ -65,7 +76,7 @@ RunFn = function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, Minus
     }
     # Sigma
     write("\n# Min, Max, Init, Phase for Sigma",file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE)
-    for(SigI in 1:length(SigOpt)){
+    for(SigI in 1:Nreaders){
       # No error
       if(SigOpt[SigI]<=0){}
       # Linear CV
@@ -85,6 +96,18 @@ RunFn = function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, Minus
         write.table(rMx(c(-10,1,0.01,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
         write.table(rMx(c(0.001,3,0.1,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
       }
+      # Spline with estimated derivative at beginning and end (Params 1-N: knot parameters; N+1 and N+2: derivative at beginning and end)
+      if(SigOpt[SigI]==5){
+        for(ParI in 1:(2+length(KnotAges[[SigI]]))){
+          write.table(rMx(c(-10.0,10.0,1.0,1)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
+        }
+      }
+      # Spline with derivative at beginning and end fixed at zero (Params 1-N: knot parameters)
+      if(SigOpt[SigI]==6){
+        for(ParI in 1:length(KnotAges[[SigI]])){
+          write.table(rMx(c(-10.0,10.0,1.0,1)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
+        }
+      }
     }
     # Probs (i.e. age-composition probability relative to reference age)
     write("\n# Min, Max, Phase for Probs",file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE)
@@ -103,10 +126,11 @@ RunFn = function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, Minus
   # Run ADMB file
   if(JustWrite==FALSE){
     setwd(SaveFile)
-    if(CallType=="shell") Output = shell(paste(SaveFile,"agemat.exe -est",sep=""),intern=Intern)
-    if(CallType=="system") Output = system(paste(SaveFile,"agemat.exe -est",sep=""),intern=Intern)
-    Admb = scan(paste(SaveFile,"agemat.par",sep=""),comment.char="#",quiet=TRUE)
+    if(CallType=="shell") Output = shell("agemat.exe -est",intern=Intern)   # This may need to have the location pasted onto it depending upon file structure
+    if(CallType=="system") Output = system("agemat.exe -est",intern=Intern)
+    #Admb = scan(paste(SaveFile,"agemat.par",sep=""),comment.char="#",quiet=TRUE)
   }
+  #return(Output)
 }
 
 ######################
@@ -155,32 +179,19 @@ PlotOutputFn = function(Data, MaxAge, SaveFile, PlotType="PDF"){
   TrueAge = apply(AgeProbs, MARGIN=1, FUN=function(Vec){order(Vec[-length(Vec)],decreasing=TRUE)[1]})
   
   # Plot estimated age structure
-  Temp = ifelse(Data[,-1]==-999,NA,Data[,-1])
-    Temp = tapply(ifelse(is.na(Temp),0,1), INDEX=Temp, FUN=sum)
-    Prop = rep(0,MaxAge+1)
-    Prop[as.numeric(names(Temp))+1] = Temp
-    cbind(0:MaxAge, Prop, round(AgeStruct[,2]*sum(Prop),1))
-    cbind(0:MaxAge, round(Prop/sum(Prop),3), round(AgeStruct[,2],3))
-  Plot = function(){
+  if(PlotType=="PDF") pdf(paste(SaveFile,"Estimated vs Observed Age Structure.pdf",sep=""),width=6,height=6)
+  if(PlotType=="PNG") png(paste(SaveFile,"Estimated vs Observed Age Structure.png",sep=""),width=6,height=6,units="in",res=200)
     par(mar=c(3,3,2,0),mgp=c(1.5,0.25,0),tck=-0.02,oma=c(0,0,0,0)+0.1)
     plot(x=AgeStruct[,1],y=AgeStruct[,2],type="s",lwd=2,xlab="Age",ylab="Prop",main="Estimated=Black, Observed=Red")
-    hist(ifelse(Data[,-1]==-999,NA,Data[,-1]*outer(Data[,1],rep(1,ncol(Data)-1))),add=TRUE,freq=FALSE,breaks=seq(0,MaxAge,by=1),col=rgb(red=1,green=0,blue=0,alpha=0.30))
-  }
-  if(PlotType=="PDF"){
-    pdf(paste(SaveFile,"Estimated vs Observed Age Structure.pdf",sep=""),width=6,height=6)
-      Plot()
-    dev.off()
-  }
-  if(PlotType=="PNG"){
-    png(paste(SaveFile,"Estimated vs Observed Age Structure.png",sep=""),width=6,height=6,units="in",res=200)
-      Plot()
-    dev.off()
-  }
-  
+    DataExpanded = Data[rep(1:nrow(Data),Data[,1]),-1]
+    hist(ifelse(DataExpanded==-999,NA,DataExpanded),add=TRUE,freq=FALSE,breaks=seq(0,MaxAge,by=1),col=rgb(red=1,green=0,blue=0,alpha=0.30))
+  dev.off()
+    
   # Plot true age against different age reads
   Ncol=ceiling(sqrt(Nreaders))
     Nrow=ceiling(Nreaders/Ncol)
-  Plot = function(){    
+  if(PlotType=="PDF") pdf(paste(SaveFile,"True vs Reads (by reader).pdf",sep=""),width=Ncol*3,height=Nrow*3)
+  if(PlotType=="PNG") png(paste(SaveFile,"True vs Reads (by reader).png",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
     par(mfrow=c(Nrow,Ncol),mar=c(3,3,2,0),mgp=c(1.5,0.25,0),tck=-0.02,oma=c(0,0,5,0)+0.1)
     for(ReadI in 1:Nreaders){
       Temp = cbind(TrueAge, Data[,ReadI+1]+0.5)   # Add 0.5 to match convention in Punt model that otoliths are read half way through year
@@ -193,17 +204,7 @@ PlotOutputFn = function(Data, MaxAge, SaveFile, PlotType="PDF"){
       lines(x=ErrorAndBiasArray['True_Age',,ReadI],y=ErrorAndBiasArray['Expected_age',,ReadI] - 2*ErrorAndBiasArray['SD',,ReadI],type="l",col="red",lwd=1,lty="dashed")
     }
     mtext(side=3,outer=TRUE, text="Reads(dot), Sd(blue), expected_read(red solid line),\n and 95% CI for expected_read(red dotted line)",line=1)
-  }
-  if(PlotType=="PDF"){
-    pdf(paste(SaveFile,"True vs Reads (by reader).pdf",sep=""),width=Ncol*3,height=Nrow*3)
-      Plot()
-    dev.off()
-  }
-  if(PlotType=="PNG"){
-    png(paste(SaveFile,"True vs Reads (by reader).png",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
-      Plot()
-    dev.off()
-  }
+  dev.off()
   
   ## AIC
   Nll = as.numeric(scan(paste(SaveFile,"agemat.par",sep=""),comment.char="%", what="character", quiet=TRUE)[11])
