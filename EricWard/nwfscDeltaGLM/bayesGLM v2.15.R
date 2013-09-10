@@ -111,6 +111,10 @@ processData = function(Truncate=0) {
   assign("nV", length(unique(Data[,'vessel'])), envir = .GlobalEnv)  
   # Diagonal matrix for the wishart / correlation model
   assign("R",diag(2), envir = .GlobalEnv)
+  
+  # If the covariates aren't in the R environment, create them
+  if(is.null(X.bin)==TRUE) assign("Xbin",diag(2), envir = .GlobalEnv)
+  if(is.null(X.pos)==TRUE) assign("Xpos",diag(2), envir = .GlobalEnv)  
 }
 
 ############################################################################
@@ -141,7 +145,7 @@ processData = function(Truncate=0) {
 
 # For MCMC samples, the total number of iterations returned will be (chains * iterToSave) / thin rate
 ###########################################################################################
-fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "random","VesselYear.positiveTows" = "random","StrataYear.zeroTows" ="random","VesselYear.zeroTows" = "random", "Vessel.positiveTows"="zero", "Vessel.zeroTows"="zero", "Catchability.positiveTows" = "one", "Catchability.zeroTows" = "zero", "year.deviations" = "uncorrelated","strata.deviations" = "uncorrelated"),covariates=list(positive=FALSE,binomial=FALSE),likelihood = "gamma", model.name = "deltaGLM.txt", fit.model=TRUE, mcmc.control = list(chains = 5, thin = 1, burn = 5000, iterToSave = 2000),Parallel=TRUE, Species = "NULL",logitBounds = c(-20,20),logBounds = c(-20,20), prior.scale = rep(25,4)) {
+fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "random","VesselYear.positiveTows" = "random","StrataYear.zeroTows" ="random","VesselYear.zeroTows" = "random", "Vessel.positiveTows"="zero", "Vessel.zeroTows"="zero", "Catchability.positiveTows" = "one", "Catchability.zeroTows" = "zero", "year.deviations" = "uncorrelated","strata.deviations" = "uncorrelated"),covariates=list(positive=FALSE,binomial=FALSE),likelihood = "gamma", model.name = "deltaGLM.txt", fit.model=TRUE, mcmc.control = list(chains = 5, thin = 1, burn = 5000, iterToSave = 2000),Parallel=TRUE, Species = "NULL",logitBounds = c(-20,20),logBounds = c(-20,20), prior.scale = rep(25,6)) {
 
   if(modelStructure$Catchability.positiveTows%in%c("linear","quadratic") | modelStructure$Catchability.zeroTows%in%c("one","linear","quadratic")){
     print("Warning: index will not have comparable scale to a design-based (raw) index unless catchability.positiveTows equals 'one'  catchability.zeroTows equals 'zero'") 
@@ -151,8 +155,8 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   	print("Warning: system OS is non-windows, and running in parallel is currently not supported. Code will run in non-parallel")
   	Parallel = FALSE
   }
-  if(length(prior.scale) != 4 | length(which(is.na(prior.scale)==T)) > 0 | length(which(prior.scale <= 0)) > 0) {
-  	print("Error: prior.scale needs to be specified as a 4-element vector, of positive values")
+  if(length(prior.scale) != 6 | length(which(is.na(prior.scale)==T)) > 0 | length(which(prior.scale <= 0)) > 0) {
+  	print("Error: prior.scale needs to be specified as a 6-element vector, of positive values")
   	stop()
   }
   if(Species == "NULL") {
@@ -212,9 +216,10 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   	nX.pos = dim(X.pos)[2]	
   }
   
-  #################################################################
-  # These 4 strings are all new, relevant for implementing the variance manipulated/expanded method described in Gelman et al. 2007, 
+  ########################################################################################################################################
+  # These 6 strings are all new, relevant for implementing the variance manipulated/expanded method described in Gelman et al. 2007, 
   # Gelman et al. 2006. The prior implicit on random effects is the non-central folded t distribution from Gelman et al. 2006
+  ########################################################################################################################################
   SYexpanded = paste("   tau.xi[1] <- pow(",prior.scale[1],", -2);\n","   xi[1] ~ dnorm (0, tau.xi[1]);\n",
   "tau.eta[1] ~ dgamma(0.5, 0.5); # chi^2 with 1 d.f.\n","sigmaSY[1] <- abs(xi[1])/sqrt(tau.eta[1]); # derived, cauchy = normal/sqrt(chi^2)\n",
   "for (j in 1:nSY){\n",
@@ -252,9 +257,10 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   "   pVdev[j] <- min(max(xi[6]*pVeta[j],",logitBounds[1],"),",logitBounds[2],");\n",
   "}\n",sep="")
 
-  ####################################################################
+  ########################################################################################################################################
   # This section is related to strata-year and vessel-year effects
   # Strata-year interactions can be (1) fixed, (2) random, (3) randomExpanded, or (4) not estimated (set to 0)
+  ########################################################################################################################################  
   SYpos.string = ""
   if(modelStructure$StrataYear.positiveTows == "fixed") SYpos.string = paste("   for(i in 1:nSY) {\n      SYdev[i] ~ dunif(",logBounds[1],",",logBounds[2],");\n   }\n   strataYearTau[1,1] <- 0;\n","   strataYearTau[1,2] <- 0;\n   sigmaSY[1]<-0;\n   tauSY[1]<-0;\n",sep="")
   if(modelStructure$StrataYear.positiveTows == "random") SYpos.string = paste("   for(i in 1:nSY) {\n      SYdev[i] ~ dnorm(0,tauSY[1])T(",logBounds[1],",",logBounds[2],");\n   }\n   strataYearTau[1,1] <- 0;\n","   strataYearTau[1,2] <- 0;\n   sigmaSY[1]~dunif(0,100);\n   tauSY[1]<-pow(sigmaSY[1],-2);\n",sep="")
@@ -289,7 +295,6 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   
   # combine the strata year interactions into a string
   vesselyear.string = paste(VYpos.string,VYzero.string)
-  #vesselyear.string = paste("   for(i in 1:nVY) {\n",VYpos.string,VYzero.string,"   }\n","   vesselYearTau[1,1] <- 0;\n","   vesselYearTau[1,2] <- 0;\n","   vesselYearTau[2,1] <- 0;\n","   vesselYearTau[2,2] <- 0;\n")
 
   if(modelStructure$VesselYear.zeroTows == "correlated" & modelStructure$VesselYear.positiveTows == "correlated") {
   	# vessel year deviations are MVN RE
@@ -317,9 +322,10 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   	vessel.string = paste("sigmaV[1] <- 0;\n   sigmaV[2] <- 0;\n   vesselTau[1:2,1:2] ~ dwish(R[1:2,1:2],2);\n   for(i in 1:nV) {\n   vdevs[i,1:2] ~ dmnorm(zs[1:2],vesselTau[1:2,1:2]);\n      Vdev[i] <- min(max(vdevs[i,1],",logBounds[1],"),",logBounds[2],");\n      pVdev[i] <- min(max(vdevs[i,2],",logitBounds[1],"),",logitBounds[2],");\n   }\n",sep="")	
   }
   
-  ####################################################################
+  ########################################################################################################################################
   # This section is related to offsets, separate for the positive and binomial models
   # catchability parameter can be set to 1 or estimated as linear or qudratic
+  ########################################################################################################################################
   #if(modelStructure$Catchability.positiveTows=="zero") catch.posTows = "   B.pos[1]<-0;\n   B.pos[2] <- 0;\n"
   if(modelStructure$Catchability.positiveTows=="one") catch.posTows = "   logB.pos[1] <- 0;\n   B.pos[1]<-exp(logB.pos[1]);\n   B.pos[2] <- 0;\n"
   if(modelStructure$Catchability.positiveTows=="linear") catch.posTows = "   logB.pos[1] ~ dnorm(0,0.1);\n   B.pos[1]<-exp(logB.pos[1]);\n   B.pos[2] <- 0;\n"
@@ -330,34 +336,32 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   if(modelStructure$Catchability.zeroTows=="linear") catch.zeroTows = "   logB.zero[1] ~ dnorm(0,0.1);\n   B.zero[1] <- exp(logB.zero[1]);\n   B.zero[2] <- 0;\n"
   if(modelStructure$Catchability.zeroTows=="quadratic") catch.zeroTows = "   logB.zero[1] ~ dnorm(0,0.1);\n   B.zero[1]<-logB.zero[1];\n   logB.zero[2] ~ dnorm(0,0.1);\n   B.zero[2]<-logB.zero[2];\n"
   
-  ####################################################################
+  ########################################################################################################################################
   # This section is related to likelihoods
-  # likelihood: lognormal, gamma, inverse gaussian
+  # likelihood: lognormal, gamma, inverse gaussian, gamma ECE, lognormal ECE, poisson, negative binomial
+  ########################################################################################################################################  
   if(likelihood == "lognormal" | likelihood == "lognormalFixedCV") {
   	# CV is sqrt(exp(sig2)-1) which is approx ~ sigma for sigma is small (< 0.2)
   	likelihood.string = paste("      u.nz[i] <- Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]];\n", "      y[nonZeros[i]] ~ dlnorm(u.nz[i],tau[1]);\n",sep="")
-  	
   	if(covariates$positive==TRUE) {
     	# modify the likelihood string to include covariates for the positive tows
     	likelihood.string = paste("      u.nz[i] <- inprod(C.pos[1:nX.pos],X.pos[i,]) + Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]];\n", "      y[nonZeros[i]] ~ dlnorm(u.nz[i],tau[1]);\n",sep="")
   	}
-  	
   	prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   sigma[1] <- sqrt(log(pow(CV[1],2)+1));\n   tau[1] <- pow(sigma[1],-2);\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"
   	if(likelihood == "lognormalFixedCV") {
   		prior.string = "   oneOverCV2[1] <- 1;\n   CV[1] <- 1;\n   CV[2] <- 0;\n   sigma[1] <- 1;\n   tau[1] <- 1;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"	
   	}
-  	
   }
+  
+  #2. GAMMA  ##################################################
   if(likelihood == "gamma" | likelihood == "gammaFixedCV") {
   	# gamma in this instance is parameterized in terms of the rate and shape, with mean = a/b, var = a/b2, and CV = 1/sqrt(a)
   	# So parameter 'a' has to be a constant, and 'b' varies by tows - b/c we calculate b = a/mean
     likelihood.string = paste("      u.nz[i] <- exp(min(Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]],100));\n","      b[i] <- gamma.a[1]/u.nz[i];\n","      y[nonZeros[i]] ~ dgamma(gamma.a[1],b[i]);\n")
-      
   	if(covariates$positive==TRUE) {
     	# modify the likelihood string to include covariates for the positive tows
     	likelihood.string = paste("      u.nz[i] <- exp(min(inprod(C.pos[1:nX.pos],X.pos[i,]) + Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]],100));\n","      b[i] <- gamma.a[1]/u.nz[i];\n","      y[nonZeros[i]] ~ dgamma(gamma.a[1],b[i]);\n")
   	}    
-  
     # for lognormal, gamma prior on 1/sigma2 = 1/CV2. To keep things consistent, gamma prior on a = 1/cv2, b/c CV = 1/sqrt(a)
     # then gamma.b[i] = gamma.a / u[i]
   	prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   gamma.a[1] <- oneOverCV2[1];\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"
@@ -365,6 +369,8 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   	prior.string = "   oneOverCV2[1] <- 1;\n   gamma.a[1] <- oneOverCV2[1];\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"  		
   	}	
   }
+  
+  #3. INVGAUSSIAN  ##################################################  
   if(likelihood == "invGaussian" | likelihood == "invGaussianFixedCV") {
   	# again, parameterize in terms of CV
   	likelihood.string = paste("      u.nz[i] <- exp(min(Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]],100));\n","      lambda[i] <- u.nz[i]*oneOverCV2[1];\n","      scaledLogLike[i] <- -(0.5*log(lambda[i]) - 0.5*logy3[nonZeros[i]] - lambda[i]*pow((y[nonZeros[i]]-u.nz[i]),2)/(2*u.nz[i]*u.nz[i]*y[nonZeros[i]])) + 10000;\n","      ones.vec[i] ~ dpois(scaledLogLike[i]);\n")
@@ -378,18 +384,17 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   	if(likelihood == "invGaussianFixedCV") prior.string = "   oneOverCV2[1] <- 1;\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"
   }
  
-  # Poisson distribution
+  #4. POISSON  ##################################################
   if(likelihood == "poisson") {
   	likelihood.string = paste("      u.nz[i] <- exp(Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]]);\n", "      y[nonZeros[i]] ~ dpois(u.nz[i]);\n",sep="")
-  	
   	if(covariates$positive==TRUE) {
     	# modify the likelihood string to include covariates for the positive tows
     	likelihood.string = paste("      u.nz[i] <- exp(inprod(C.pos[1:nX.pos],X.pos[i,]) + Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]]);\n", "      y[nonZeros[i]] ~ dpois(u.nz[i]);\n",sep="")
   	}
-  	prior.string = "   oneOverCV2[1] <- 0;\n   CV[1] <- 0;\n   CV[2] <- 0;\n   sigma[1] <- 0;\n   tau[1] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"  	
+  	prior.string = "   oneOverCV2[1] <- 0;\n   CV[1] <- 0;\n   CV[2] <- 0;\n   sigma[1] <- 0;\n   tau[1] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n" 
   }
 
-  # Negative binomial distribution
+  #5. NEGATIVE BINOMIAL  ##################################################
   if(likelihood == "negbin") {
   	# calculate p = r / (mean + r)
   	likelihood.string = paste("      u.nz[i] <- r / (r + exp(Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]]));\n", "      y[nonZeros[i]] ~ dnegbin(u.nz[i],r);\n",sep="")
@@ -401,6 +406,7 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
     prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   r <- 1/oneOverCV2[1];\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;"
   }
     
+  #6. lognormalECE  ##################################################    
   if(likelihood == "lognormalECE") {
   	# CV is sqrt(exp(sig2)-1) which is approx ~ sigma. Each tow is treated as discrete group (normal, ECE)
   	# if 1, don't do anything 
@@ -415,6 +421,8 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   	# for the ECE model, the normal and extreme distributions each get a separate variance
   	prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   sigma[1] <- sqrt(log(pow(CV[1],2)+1));\n   tau[1] <- pow(sigma[1],-2);\n   oneOverCV2[2] ~ dgamma(0.001,0.001);\n   CV[2] <- 1/sqrt(oneOverCV2[2]);\n   sigma[2] <- sqrt(log(pow(CV[2],2)+1));\n   tau[2] <- pow(sigma[2],-2);\n   logratio ~ dunif(0,5);\n   ratio <- exp(logratio);\n   alpha.ece[1] <- 1;\n   alpha.ece[2] <- 1;\n   p.ece[1:2] ~ ddirch(alpha.ece[1:2]);\n"
   }
+  
+  #7. gammaECE  ##################################################
   if(likelihood == "gammaECE") {
   	# gamma in this instance is parameterized in terms of the rate and shape, with mean = a/b, var = a/b2, and CV = 1/sqrt(a)
   	# So parameter 'a' has to be a constant, and 'b' varies by tows - b/c we calculate b = a/mean
@@ -519,7 +527,7 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   modelFit = NA
   
   if(fit.model) {
-jags.params=c("Ydev","Sdev","SYdev","VYdev","pYdev","pSdev","pSYdev","pVYdev","B.zero","B.pos","sigmaSY","sigmaVY","sigmaV","CV","ratio","p.ece","yearTau","strataTau","strataYearTau","vesselYearTau","C.pos","C.bin","Vdev","pVdev")
+jags.params=c("Ydev","Sdev","SYdev","VYdev","pYdev","pSdev","pSYdev","pVYdev","B.zero","B.pos","sigmaSY","sigmaVY","CV","ratio","p.ece","yearTau","strataTau","strataYearTau","vesselYearTau","C.pos","C.bin","Vdev","pVdev")
     jags.data = list("y","logy3","effort","effort2","logeffort", "logeffort2","nonZeros", "n", "isNonZeroTrawl", "nNonZeros", "nV","nVY", "nSY", "nS", "nY", "year", "vesselYear", "vessel","strata", "strataYear","ones.vec","R","X.pos","X.bin")
   
     if(Parallel==TRUE) {
