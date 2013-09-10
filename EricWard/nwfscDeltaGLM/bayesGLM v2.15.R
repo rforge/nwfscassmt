@@ -1397,6 +1397,33 @@ ComputeMleIndices = function(Data, Model, FileName, Folder=NA, Weights="StrataAr
   return(list(Results1=Results1, Results2=Results2))
 }    
     
+#########
+# Plot vessel effects
+#########
+VesselEffects = function(Model, FileName, Folder=NA){
+
+  # Make folder
+  if(is.na(Folder)) Folder = paste(getwd(),"/",sep="")  
+  
+  # Plot vessel effects
+  for(PlotI in 1:2){
+    png(paste(Folder,"/","","Vessel_effect_",c("Positive","Presence-absence")[PlotI],".png",sep=""),width=5,height=5,res=200,units="in")
+      par(mar=c(3,3,1,0), mgp=c(1.5,0.5,0), tck=-0.02)
+      if(PlotI==1) VarName="VYdev"               # Positive catches
+      if(PlotI==2) VarName="pVYdev"               # Presence/absence
+      if( (PlotI==1 & Model$modelStructure$VesselYear.positiveTows=="random") | (PlotI==2 & Model$modelStructure$VesselYear.zeroTows=="random") ){
+        VY_mean = colMeans(Model$BUGSoutput$sims.list[[VarName]])
+        Unique = unique(Data$vesselYear)
+        Match = match(Unique, Data$vesselYear)
+        VY_year = Data$year[Match]
+        VY_vessel = Data$VESSEL[Match]
+        plot(x=VY_year, y=VY_mean, col=rainbow(length(unique(VY_vessel)))[factor(VY_vessel)], pch=(1:length(unique(VY_vessel)))[factor(VY_vessel)])    
+        #plot(x=as.numeric(as.character(VY_year)), y=VY_mean, pch=1:length(VY_mean)%%10, xlab="Year", ylab="Vessel effect", type="p")
+        abline(h=0, lty="dotted")
+      } 
+    dev.off()
+  }
+}
 
 ########################################################
 ####### This block of code is related to processing output
@@ -1490,6 +1517,8 @@ doMCMCDiags = function(directory, mods, McmcDiagnostics=FALSE) {
     PlotOffset(Data=Data, BugsList=BugsList, FileName="", Folder=Folder)
     # Posterior predictive distribution for positive catches
     PosteriorPredictive(Data=Data, Model=Model, FileName="", Folder=Folder)
+    # Plot vessel effects
+    VesselEffects(Model=Model, FileName="", Folder=Folder)
     # JAGS indices of abundance
     McmcIndices = ComputeIndices(Data=Data, Model=Model, FileName="", Folder=Folder, Weights=c("StrataAreas","Equal")[1], StrataTable=StrataTable)
     # MLE indices of abundance
