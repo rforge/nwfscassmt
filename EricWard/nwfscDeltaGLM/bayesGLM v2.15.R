@@ -1418,7 +1418,7 @@ VesselEffects = function(Model, FileName, Folder=NA){
         VY_year = Data$year[Match]
         VY_vessel = Data$VESSEL[Match]
         VY_vesselYear = Data$vesselYear[Match]
-        plot(x=VY_year, y=VY_mean[VY_vesselYear], col=rainbow(length(unique(VY_vessel)))[factor(VY_vessel)], pch=(1:length(unique(VY_vessel)))[factor(VY_vessel)])    
+        plot(x=as.numeric(as.character(VY_year)), y=VY_mean[VY_vesselYear], col=rainbow(length(unique(VY_vessel)))[factor(VY_vessel)], pch=(1:length(unique(VY_vessel)))[factor(VY_vessel)], cex=2, lwd=2, xlab="Year", ylab="Deviation")    
         #plot(x=as.numeric(as.character(VY_year)), y=VY_mean, pch=1:length(VY_mean)%%10, xlab="Year", ylab="Vessel effect", type="p")
         abline(h=0, lty="dotted")
       } 
