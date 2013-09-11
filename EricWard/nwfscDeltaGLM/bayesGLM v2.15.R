@@ -47,8 +47,9 @@ processData = function(Truncate=0) {
   Data = cbind(Data, 'y'=Data[,'HAUL_WT_KG']) 
   Data = cbind(Data, 'strata'=apply(masterDat,1,strata.fn,Strata.df=strata.limits))
   Data = cbind(Data, 'isNonZeroTrawl'=ifelse(Data[,'y']>0,1,0))
-  Data = cbind(Data, 'ones.vec'=rep(0,length(Data[,'y']))) # this is just for the 'ones-trick', inv Gaussian 
+  Data = cbind(Data, 'zeros.vec'=rep(0,length(Data[,'y']))) # this is just for the 'ones-trick', inv Gaussian 
   Data = cbind(Data, 'logy3'=log(pi*2*(Data[,'y']^3))) # this is a constant for the invGaussian
+  Data = cbind(Data, 'logy'=log((Data[,'y']))) # this is a constant for the LognormalECE2 model
   Data = cbind(Data, 'logeffort'=log(Data[,'effort']))
   Data = cbind(Data, 'effort2' = Data[,'effort']^2)
   Data = cbind(Data, 'logeffort2' = Data[,'logeffort']^2)  
@@ -114,7 +115,9 @@ processData = function(Truncate=0) {
   
   # If the covariates aren't in the R environment, create them
   if(is.null(X.bin)==TRUE) assign("Xbin",diag(2), envir = .GlobalEnv)
-  if(is.null(X.pos)==TRUE) assign("Xpos",diag(2), envir = .GlobalEnv)  
+  if(is.null(X.pos)==TRUE) assign("Xpos",diag(2), envir = .GlobalEnv)
+  
+  assign("log2pi",log(2*pi), envir = .GlobalEnv) # this is a constant for the LognormalECE2 model  
 }
 
 ############################################################################
@@ -373,11 +376,11 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   #3. INVGAUSSIAN  ##################################################  
   if(likelihood == "invGaussian" | likelihood == "invGaussianFixedCV") {
   	# again, parameterize in terms of CV
-  	likelihood.string = paste("      u.nz[i] <- exp(min(Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]],100));\n","      lambda[i] <- u.nz[i]*oneOverCV2[1];\n","      scaledLogLike[i] <- -(0.5*log(lambda[i]) - 0.5*logy3[nonZeros[i]] - lambda[i]*pow((y[nonZeros[i]]-u.nz[i]),2)/(2*u.nz[i]*u.nz[i]*y[nonZeros[i]])) + 10000;\n","      ones.vec[i] ~ dpois(scaledLogLike[i]);\n")
+  	likelihood.string = paste("      u.nz[i] <- exp(min(Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]],100));\n","      lambda[i] <- u.nz[i]*oneOverCV2[1];\n","      scaledLogLike[i] <- -(0.5*log(lambda[i]) - 0.5*logy3[nonZeros[i]] - lambda[i]*pow((y[nonZeros[i]]-u.nz[i]),2)/(2*u.nz[i]*u.nz[i]*y[nonZeros[i]])) + 10000;\n","      zeros.vec[i] ~ dpois(scaledLogLike[i]);\n")
   	
   	if(covariates$positive==TRUE) {
     	# modify the likelihood string to include covariates for the positive tows
-    	likelihood.string = paste("      u.nz[i] <- exp(min(inprod(C.pos[1:nX.pos],X.pos[i,]) + Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]],100));\n","      lambda[i] <- u.nz[i]*oneOverCV2[1];\n","      scaledLogLike[i] <- -(0.5*log(lambda[i]) - 0.5*logy3[nonZeros[i]] - lambda[i]*pow((y[nonZeros[i]]-u.nz[i]),2)/(2*u.nz[i]*u.nz[i]*y[nonZeros[i]])) + 10000;\n","      ones.vec[i] ~ dpois(scaledLogLike[i]);\n")
+    	likelihood.string = paste("      u.nz[i] <- exp(min(inprod(C.pos[1:nX.pos],X.pos[i,]) + Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]],100));\n","      lambda[i] <- u.nz[i]*oneOverCV2[1];\n","      scaledLogLike[i] <- -(0.5*log(lambda[i]) - 0.5*logy3[nonZeros[i]] - lambda[i]*pow((y[nonZeros[i]]-u.nz[i]),2)/(2*u.nz[i]*u.nz[i]*y[nonZeros[i]])) + 10000;\n","      zeros.vec[i] ~ dpois(scaledLogLike[i]);\n")
   	} 	
   	
   	prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"	
@@ -422,19 +425,51 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   	prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   sigma[1] <- sqrt(log(pow(CV[1],2)+1));\n   tau[1] <- pow(sigma[1],-2);\n   oneOverCV2[2] ~ dgamma(0.001,0.001);\n   CV[2] <- 1/sqrt(oneOverCV2[2]);\n   sigma[2] <- sqrt(log(pow(CV[2],2)+1));\n   tau[2] <- pow(sigma[2],-2);\n   logratio ~ dunif(0,5);\n   ratio <- exp(logratio);\n   alpha.ece[1] <- 1;\n   alpha.ece[2] <- 1;\n   p.ece[1:2] ~ ddirch(alpha.ece[1:2]);\n"
   }
   
-  #7. gammaECE  ##################################################
+  #7. lognormalECE2  ##################################################    
+  if(likelihood == "lognormalECE2") {
+  	# CV is sqrt(exp(sig2)-1) which is approx ~ sigma. Each tow is treated as discrete group (normal, ECE)
+  	# if 1, don't do anything 
+  	# if 2, multiply by ratio 
+  	# EW: this implements the Poisson "zeros" trick
+  	likelihood.string = paste("      u.nz[i] <- (Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]]);\n   scaledLogLike[i] <- -log(p.ece[1]*exp(-logy[nonZeros[i]]-log2pi-log(sigma[1])-pow(logy[nonZeros[i]]-u.nz[i],2)/(2*pow(sigma[1],2))) + p.ece[2]*exp(-logy[nonZeros[i]]-log2pi-log(sigma[2])-pow(logy[nonZeros[i]]-(u.nz[i] + logratio),2)/(2*pow(sigma[2],2)))) + 10000;\n", "      zeros.vec[i] ~ dpois(scaledLogLike[i]);\n",sep="")
+  	
+  	if(covariates$positive==TRUE) {       
+    	# modify the likelihood string to include covariates for the positive tows
+  	    likelihood.string = paste("      u.nz[i] <- ((inprod(C.pos[1:nX.pos],X.pos[i,]) + Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]]);\n   scaledLogLike[i] <- -log(p.ece[1]*exp(-logy[i]-log2pi-log(sigma[1])-pow(logy[i]-u.nz[i],2)/(2*pow(sigma[1],2))) + p.ece[2]*exp(-logy[i]-log2pi-log(sigma[2])-pow(logy[i]-(u.nz[i] + logratio),2)/(2*pow(sigma[2],2)))) + 10000;\n", "      zeros.vec[i] ~ dpois(scaledLogLike[i]);\n",sep="")    	
+  	} 		
+  	
+  	# for the ECE model, the normal and extreme distributions each get a separate variance
+  	prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   sigma[1] <- sqrt(log(pow(CV[1],2)+1));\n   tau[1] <- pow(sigma[1],-2);\n   oneOverCV2[2] ~ dgamma(0.001,0.001);\n   CV[2] <- 1/sqrt(oneOverCV2[2]);\n   sigma[2] <- sqrt(log(pow(CV[2],2)+1));\n   tau[2] <- pow(sigma[2],-2);\n   logratio ~ dunif(0,5);\n   ratio <- exp(logratio);\n   alpha.ece[1] <- 1;\n   alpha.ece[2] <- 1;\n   p.ece[1:2] ~ ddirch(alpha.ece[1:2]);\n"
+  }
+  
+  #8. gammaECE  ##################################################
   if(likelihood == "gammaECE") {
   	# gamma in this instance is parameterized in terms of the rate and shape, with mean = a/b, var = a/b2, and CV = 1/sqrt(a)
   	# So parameter 'a' has to be a constant, and 'b' varies by tows - b/c we calculate b = a/mean
-    likelihood.string = paste("      G[i] ~ dcat(p.ece[1:2]);\n      u.nz[i] <- exp((G[i]-1)*logratio + min(Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]],100));\n","      b[i] <- gamma.a[G[i]]/u.nz[i];\n","      y[nonZeros[i]] ~ dgamma(gamma.a[G[i]],b[i]);\n")
+    likelihood.string = paste("      G[i] ~ dcat(p.ece[1:2]);\n      u.nz[i] <- exp((G[i]-1)*logratio + min(Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]],100));\n","      b[i] <- gamma.a[G[i]]/u.nz[i];\n","      y[nonZeros[i]] ~ dgamma(gamma.a[G[i]],b[i]);\n")
       
   	if(covariates$positive==TRUE) {
   	# modify the likelihood string to include covariates for the positive tows
-    	likelihood.string = paste("      G[i] ~ dcat(p.ece[1:2]);\n      u.nz[i] <- exp((G[i]-1)*logratio + min(inprod(C.pos[1:nX.pos],X.pos[i,]) + Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]],100));\n","      b[i] <- gamma.a[G[i]]/u.nz[i];\n","      y[nonZeros[i]] ~ dgamma(gamma.a[G[i]],b[i]);\n")
+    	likelihood.string = paste("      G[i] ~ dcat(p.ece[1:2]);\n      u.nz[i] <- exp((G[i]-1)*logratio + min(inprod(C.pos[1:nX.pos],X.pos[i,]) + Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]],100));\n","      b[i] <- gamma.a[G[i]]/u.nz[i];\n","      y[nonZeros[i]] ~ dgamma(gamma.a[G[i]],b[i]);\n")
   	} 		    
       
       # for lognormal, gamma prior on 1/sigma2 = 1/CV2. To keep things consistent, gamma prior on a = 1/cv2, b/c CV = 1/sqrt(a)
       # then gamma.b[i] = gamma.a / u[i]
+  	prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   gamma.a[1] <- oneOverCV2[1];\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   oneOverCV2[2] ~ dgamma(0.001,0.001);\n   gamma.a[2] <- oneOverCV2[2];\n   CV[2] <- 1/sqrt(oneOverCV2[2]);\n   logratio ~ dunif(0,5);\n   ratio <- exp(logratio);\n   alpha.ece[1] <- 1;\n   alpha.ece[2] <- 1;\n   p.ece[1:2] ~ ddirch(alpha.ece[1:2]);\n"
+  }
+      
+  #9. gammaECE  ##################################################
+  if(likelihood == "gammaECE2") {
+  	# gamma in this instance is parameterized in terms of the rate and shape, with mean = a/b, var = a/b2, and CV = 1/sqrt(a)
+  	# So parameter 'a' has to be a constant, and 'b' varies by tows - b/c we calculate b = a/mean
+    likelihood.string = paste("      u.nz[i] <- exp(min(Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]],100));\n","      scaledLogLike[i] <- -log(p.ece[1]*exp(gamma.a[1]*log(gamma.a[1]/u.nz[i]) + (gamma.a[1]-1)*logy[nonZeros[i]] -(gamma.a[1]/u.nz[i])*y[nonZeros[i]] - loggam(gamma.a[1])) + p.ece[2]*exp(gamma.a[2]*log(gamma.a[2]/(u.nz[i]*exp(logratio))) + (gamma.a[2]-1)*logy[nonZeros[i]] -(gamma.a[2]/(u.nz[i]*exp(logratio)))*y[nonZeros[i]] - loggam(gamma.a[2]))) + 10000;\n",     "zeros.vec[i] ~ dpois(scaledLogLike[i]);\n",sep="")
+      
+  	if(covariates$positive==TRUE) {
+  	# modify the likelihood string to include covariates for the positive tow
+  	likelihood.string = paste("      u.nz[i] <- exp(min(inprod(C.pos[1:nX.pos],X.pos[i,]) + Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]],100));\n","      scaledLogLike[i] <- -log(p.ece[1]*exp(gamma.a[1]*log(gamma.a[1]/u.nz[i]) + (gamma.a[1]-1)*logy[i] -(gamma.a[1]/u.nz[i])*y[i] - loggam(gamma.a[1])) + p.ece[2]*exp(gamma.a[2]*log(gamma.a[2]/(u.nz[i]*exp(logratio))) + (gamma.a[2]-1)*logy[i] -(gamma.a[2]/(u.nz[i]*exp(logratio)))*y[i] - loggam(gamma.a[2]))) + 10000;\n",     "zeros.vec[i] ~ dpois(scaledLogLike[i]);\n")   	 	
+  	}
+    # for lognormal, gamma prior on 1/sigma2 = 1/CV2. To keep things consistent, gamma prior on a = 1/cv2, b/c CV = 1/sqrt(a)
+    # then gamma.b[i] = gamma.a / u[i]
   	prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   gamma.a[1] <- oneOverCV2[1];\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   oneOverCV2[2] ~ dgamma(0.001,0.001);\n   gamma.a[2] <- oneOverCV2[2];\n   CV[2] <- 1/sqrt(oneOverCV2[2]);\n   logratio ~ dunif(0,5);\n   ratio <- exp(logratio);\n   alpha.ece[1] <- 1;\n   alpha.ece[2] <- 1;\n   p.ece[1:2] ~ ddirch(alpha.ece[1:2]);\n"
   }
   
@@ -528,7 +563,7 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   
   if(fit.model) {
 jags.params=c("Ydev","Sdev","SYdev","VYdev","pYdev","pSdev","pSYdev","pVYdev","B.zero","B.pos","sigmaSY","sigmaVY","CV","ratio","p.ece","yearTau","strataTau","strataYearTau","vesselYearTau","C.pos","C.bin","Vdev","pVdev")
-    jags.data = list("y","logy3","effort","effort2","logeffort", "logeffort2","nonZeros", "n", "isNonZeroTrawl", "nNonZeros", "nV","nVY", "nSY", "nS", "nY", "year", "vesselYear", "vessel","strata", "strataYear","ones.vec","R","X.pos","X.bin")
+    jags.data = list("y","logy3","logy","log2pi","effort","effort2","logeffort", "logeffort2","nonZeros", "n", "isNonZeroTrawl", "nNonZeros", "nV","nVY", "nSY", "nS", "nY", "year", "vesselYear", "vessel","strata", "strataYear","zeros.vec","R","X.pos","X.bin")
   
     if(Parallel==TRUE) {
     	modelFit= jags.parallel(jags.data, inits = NULL, parameters.to.save= jags.params, model.file=model.name, n.chains = mcmc.control$chains, n.burnin = mcmc.control$burn, n.thin = mcmc.control$thin, n.iter = as.numeric(mcmc.control$burn+mcmc.control$iterToSave), DIC = TRUE)
@@ -1332,7 +1367,7 @@ ComputeMleIndices = function(Data, Model, FileName, Folder=NA, Weights="StrataAr
   # Estimate marginal means
   Mat = matrix(NA,nrow=length(levels(year)),ncol=length(levels(strata))) 
   DataNew = data.frame(year=levels(year)[as.vector(row(Mat))], strata=levels(strata)[as.vector(col(Mat))])
-  DataNew = data.frame(DataNew, logeffort=rep(log(1),nrow(DataNew)), vesselYear=rep(999,nrow(DataNew)), ones.vec=rep(log(1),nrow(DataNew)))   # I need to include ones.vec as zero for some reason
+  DataNew = data.frame(DataNew, logeffort=rep(log(1),nrow(DataNew)), vesselYear=rep(999,nrow(DataNew)), zeros.vec=rep(log(1),nrow(DataNew)))   # I need to include zeros.vec as zero for some reason
 
   # Only run if there's no random effects and the distribution is either Gamma and Lognormal
   if( (modelStructure$VesselYear.zeroTows%in%c("zero","fixed")) & (modelStructure$VesselYear.positiveTows%in%c("zero","fixed")) & (modelStructure$StrataYear.zeroTows%in%c("zero","fixed")) & (modelStructure$StrataYear.positiveTows%in%c("zero","fixed"))  & (Dist=="gamma" | Dist=="lognormal") & Run==TRUE){
@@ -1355,7 +1390,7 @@ ComputeMleIndices = function(Data, Model, FileName, Folder=NA, Weights="StrataAr
     #### Presence/absence
     GlmPres <- glm(as.formula(paste("ifelse(Data[,'HAUL_WT_KG']>0,1,0)",FormulaPres)), family=binomial, control=glm.control(epsilon=1e-8, maxit=1000, trace=FALSE))
     #### Positive catches
-    #OffsetPos = list(ones.vec,logeffort)[[ifelse(modelStructure$Catchability.positiveTows=="one",2,1)]]
+    #OffsetPos = list(zeros.vec,logeffort)[[ifelse(modelStructure$Catchability.positiveTows=="one",2,1)]]
     if(Dist=="gamma") GlmPos <- glm(as.formula(paste("HAUL_WT_KG",FormulaPos)), family=Gamma(link="log"), offset=logeffort, subset=which(Data[,'HAUL_WT_KG']>0), control=glm.control(epsilon=1e-8, maxit=1000, trace=FALSE))
     if(Dist=="lognormal") GlmPos <- lm(as.formula(paste("log(HAUL_WT_KG)",FormulaPos)), offset=logeffort, subset=which(Data[,'HAUL_WT_KG']>0))
     
