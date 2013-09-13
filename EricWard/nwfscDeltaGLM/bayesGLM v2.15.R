@@ -73,11 +73,13 @@ processData = function(Truncate=0) {
   
   # Count number of tows per strata and year
   TowsPerStrataYear = table(Data[,'strata'],Data[,'year'])
+  write.table(TowsPerStrataYear,"Tows_Per_StrataYear.csv",row.names=F,col.names=T,sep=",")
   print(paste("Tows per strata and year are displayed below"))
   print(TowsPerStrataYear)
   
   # Count number of positive catches per strata and year
   EncountersPerStrataYear = table(Data[,'strata'],Data[,'year'],Data[,'isNonZeroTrawl'])[,,"1"]
+  write.table(EncountersPerStrataYear,"Encounters_Per_StrataYear.csv",row.names=F,col.names=T,sep=",")
   print(paste("Encounters per strata and year are displayed below"))
   print(EncountersPerStrataYear)
   
