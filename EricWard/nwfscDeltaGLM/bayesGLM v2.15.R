@@ -150,7 +150,7 @@ processData = function(Truncate=0) {
 
 # For MCMC samples, the total number of iterations returned will be (chains * iterToSave) / thin rate
 ###########################################################################################
-fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "random","VesselYear.positiveTows" = "random","StrataYear.zeroTows" ="random","VesselYear.zeroTows" = "random", "Vessel.positiveTows"="zero", "Vessel.zeroTows"="zero", "Catchability.positiveTows" = "one", "Catchability.zeroTows" = "zero", "year.deviations" = "uncorrelated","strata.deviations" = "uncorrelated"),covariates=list(positive=FALSE,binomial=FALSE),likelihood = "gamma", model.name = "deltaGLM.txt", fit.model=TRUE, mcmc.control = list(chains = 5, thin = 1, burn = 5000, iterToSave = 2000),Parallel=TRUE, Species = "NULL",logitBounds = c(-20,20),logBounds = c(-20,20), prior.scale = rep(25,6)) {
+fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "random","VesselYear.positiveTows" = "random","StrataYear.zeroTows" ="random","VesselYear.zeroTows" = "random", "Vessel.positiveTows"="zero", "Vessel.zeroTows"="zero", "Catchability.positiveTows" = "one", "Catchability.zeroTows" = "zero", "year.deviations" = "uncorrelated","strata.deviations" = "uncorrelated"),covariates=list(positive=FALSE,binomial=FALSE),likelihood = "gamma", pres_link="logit", model.name = "deltaGLM.txt", fit.model=TRUE, mcmc.control = list(chains = 5, thin = 1, burn = 5000, iterToSave = 2000),Parallel=TRUE, Species = "NULL",logitBounds = c(-20,20),logBounds = c(-20,20), prior.scale = rep(25,6)) {
 
   if(modelStructure$Catchability.positiveTows%in%c("linear","quadratic") | modelStructure$Catchability.zeroTows%in%c("one","linear","quadratic")){
     print("Warning: index will not have comparable scale to a design-based (raw) index unless catchability.positiveTows equals 'one'  catchability.zeroTows equals 'zero'") 
@@ -516,9 +516,11 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   }
   
   # This IF statement is just to modify the expected value of the binomial model to include covariates IF they are specified 
-  logit.p.string = "logit(p.z[i]) <- pVdev[vessel[i]] + pVYdev[vesselYear[i]] + pSdev[strata[i]] + pYdev[year[i]] + pSYdev[strataYear[i]] + B.zero[1]*effort[i] + B.zero[2]*effort2[i];\n"
+  if(pres_link == "logit") logit.p.string = "logit(p.z[i]) <- pVdev[vessel[i]] + pVYdev[vesselYear[i]] + pSdev[strata[i]] + pYdev[year[i]] + pSYdev[strataYear[i]] + B.zero[1]*effort[i] + B.zero[2]*effort2[i];\n"
+  if(pres_link == "probit") logit.p.string = "probit(p.z[i]) <- pVdev[vessel[i]] + pVYdev[vesselYear[i]] + pSdev[strata[i]] + pYdev[year[i]] + pSYdev[strataYear[i]] + B.zero[1]*effort[i] + B.zero[2]*effort2[i];\n"
   if(covariates$binomial == TRUE) {
-  	logit.p.string = "logit(p.z[i]) <- inprod(C.bin[1:nX.binomial],X.bin[i,]) + pVdev[vessel[i]] + pVYdev[vesselYear[i]] + pSdev[strata[i]] + pYdev[year[i]] + pSYdev[strataYear[i]] + B.zero[1]*effort[i] + B.zero[2]*effort2[i];\n"	
+  	if(pres_link == "logit") logit.p.string = "logit(p.z[i]) <- inprod(C.bin[1:nX.binomial],X.bin[i,]) + pVdev[vessel[i]] + pVYdev[vesselYear[i]] + pSdev[strata[i]] + pYdev[year[i]] + pSYdev[strataYear[i]] + B.zero[1]*effort[i] + B.zero[2]*effort2[i];\n"	
+  	if(pres_link == "probit") logit.p.string = "probit(p.z[i]) <- inprod(C.bin[1:nX.binomial],X.bin[i,]) + pVdev[vessel[i]] + pVYdev[vesselYear[i]] + pSdev[strata[i]] + pYdev[year[i]] + pSYdev[strataYear[i]] + B.zero[1]*effort[i] + B.zero[2]*effort2[i];\n"	
   }
   
   deltaGLM = 
@@ -1604,4 +1606,18 @@ doMCMCDiags = function(directory, mods, McmcDiagnostics=FALSE) {
     }
   dev.off()
 
+  # Plot deviance distribution for all configurations
+  png(paste(SpeciesFolder,"Comparison_Posterior_Deviance.png",sep=""),width=1*5,height=1*5,res=200,units="in")
+    par(mgp=c(1.25,0.25,0), mar=c(3,3,1,0), tck=-0.02)
+    Deviance = sapply(mods, FUN=function(List){as.matrix(List$BUGSoutput$sims.list$deviance,ncol=1)[,1]})
+    D = apply(Deviance, MARGIN=2, FUN=density)
+    Ymax = sapply(D, FUN=function(List){max(List$y)})
+    plot(density(mods[[1]]$BUGSoutput$sims.list$deviance), ylab="Density", xlab="Deviance", main="Posterior deviance", col=rainbow(length(mods))[1], xlim=quantile(Deviance, prob=c(0.001,0.999)), ylim=c(0,max(Ymax)))
+    if(length(mods)>1){
+      for(i in 1:length(mods)){
+        lines(density(mods[[i]]$BUGSoutput$sims.list$deviance), col=rainbow(length(mods))[i])
+      }
+    }
+    legend("topleft",fill=rainbow(length(mods)), legend=paste("Model",1:length(mods)))
+  dev.off()
 }
