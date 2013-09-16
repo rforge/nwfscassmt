@@ -289,12 +289,14 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   VYpos.string = ""
   if(modelStructure$VesselYear.positiveTows == "fixed") VYpos.string = paste("   VYdev[1] <- 0;\n   for(i in 2:nVY) {\n      VYdev[i] ~ dunif(",logBounds[1],",",logBounds[2],");\n   }\n   vesselYearTau[1,1] <- 0;\n","   vesselYearTau[1,2] <- 0;\n   sigmaVY[1]<-0;\n   tauVY[1]<-0;\n",sep="")
   if(modelStructure$VesselYear.positiveTows == "random") VYpos.string = paste("   for(i in 1:nVY) {\n      VYdev[i] ~ dnorm(0,tauVY[1])T(",logBounds[1],",",logBounds[2],");\n   }\n   vesselYearTau[1,1] <- 0;\n","   vesselYearTau[1,2] <- 0;\n   sigmaVY[1]~dunif(0,100);\n   tauVY[1]<-pow(sigmaVY[1],-2);\n",sep="")
+  if(modelStructure$VesselYear.positiveTows == "random2") VYpos.string = paste("   for(i in 1:nVY) {\n      VYdev[i] ~ dnorm(0,tauVY[1])T(",logBounds[1],",",logBounds[2],");\n   }\n   vesselYearTau[1,1] <- 0;\n","   vesselYearTau[1,2] <- 0;\n   sigmaVY[1]<-pow(tauVY[1],-1/2);\n   tauVY[1]~dgamma(0.001,0.001);\n",sep="")
   if(modelStructure$VesselYear.positiveTows == "randomExpanded") VYpos.string = paste(VYexpanded,"   vesselYearTau[1,1] <- 0;\n","   vesselYearTau[1,2] <- 0;\n   tauVY[1]<-pow(sigmaVY[1],-2);\n",sep="")
   if(modelStructure$VesselYear.positiveTows == "zero") VYpos.string = "   for(i in 1:nVY) {\n      VYdev[i] <- 0;\n   }\n   vesselYearTau[1,1] <- 0;\n   vesselYearTau[1,2] <- 0;\n   sigmaVY[1]<-0;\n   tauVY[1]<-0;\n"
   
   VYzero.string = ""
   if(modelStructure$VesselYear.zeroTows == "fixed") VYzero.string = paste("   pVYdev[1] <- 0;\n   for(i in 2:nVY) {\n      pVYdev[i] ~ dunif(",logitBounds[1],",",logitBounds[2],");\n   }\n   vesselYearTau[2,1] <- 0;\n","   vesselYearTau[2,2] <- 0;\n   sigmaVY[2]<-0;\n   tauVY[2]<-0;\n",sep="")
   if(modelStructure$VesselYear.zeroTows == "random") VYzero.string = paste("   for(i in 1:nVY) {\n      pVYdev[i] ~ dnorm(0,tauVY[2])T(",logitBounds[1],",",logitBounds[2],");\n   }\n   vesselYearTau[2,1] <- 0;\n","   vesselYearTau[2,2] <- 0;\n   sigmaVY[2] ~ dunif(0,100);\n   tauVY[2]<-pow(sigmaVY[2],-2);\n",sep="")
+  if(modelStructure$VesselYear.zeroTows == "random2") VYzero.string = paste("   for(i in 1:nVY) {\n      pVYdev[i] ~ dnorm(0,tauVY[2])T(",logitBounds[1],",",logitBounds[2],");\n   }\n   vesselYearTau[2,1] <- 0;\n","   vesselYearTau[2,2] <- 0;\n   sigmaVY[2]<-pow(tauVY[2],-1/2);\n   tauVY[2]~dgamma(0.001,0.001);\n",sep="")
   if(modelStructure$VesselYear.zeroTows == "randomExpanded") VYzero.string = paste(pVYexpanded,"   vesselYearTau[2,1] <- 0;\n","   vesselYearTau[2,2] <- 0;\n   tauVY[2]<-pow(sigmaVY[2],-2);\n",sep="")
   if(modelStructure$VesselYear.zeroTows == "zero") VYzero.string = "   for(i in 1:nVY) {\n      pVYdev[i] <- 0;\n   }\n   vesselYearTau[2,1] <- 0;\n   vesselYearTau[2,2] <- 0;\n   sigmaVY[2]<-0;\n   tauVY[2]<-0;\n"
   
@@ -310,12 +312,14 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   Vpos.string = ""
   if(modelStructure$Vessel.positiveTows == "fixed") Vpos.string = paste("   Vdev[1] <- 0;\n   for(i in 2:nV) {\n      Vdev[i] ~ dunif(",logBounds[1],",",logBounds[2],");\n   }\n   vesselTau[1,1] <- 0;\n","   vesselTau[1,2] <- 0;\n   sigmaV[1]<-0;\n   tauV[1]<-0;\n",sep="")
   if(modelStructure$Vessel.positiveTows == "random") Vpos.string = paste("   for(i in 1:nV) {\n      Vdev[i] ~ dnorm(0,tauV[1])T(",logBounds[1],",",logBounds[2],");\n   }\n   vesselTau[1,1] <- 0;\n","   vesselTau[1,2] <- 0;\n   sigmaV[1]~dunif(0,100);\n   tauV[1]<-pow(sigmaV[1],-2);\n",sep="")
+  if(modelStructure$Vessel.positiveTows == "random2") Vpos.string = paste("   for(i in 1:nV) {\n      Vdev[i] ~ dnorm(0,tauV[1])T(",logBounds[1],",",logBounds[2],");\n   }\n   vesselTau[1,1] <- 0;\n","   vesselTau[1,2] <- 0;\n   sigmaV[1]<-pow(tauV[1],-1/2);\n   tauV[1]~dgamma(0.001,0.001);\n",sep="")
   if(modelStructure$Vessel.positiveTows == "randomExpanded") Vpos.string = paste(Vexpanded,"   vesselTau[1,1] <- 0;\n","   vesselTau[1,2] <- 0;\n   tauV[1]<-pow(sigmaV[1],-2);\n",sep="")
   if(modelStructure$Vessel.positiveTows == "zero") Vpos.string = "   for(i in 1:nV) {\n      Vdev[i] <- 0;\n   }\n   vesselTau[1,1] <- 0;\n   vesselTau[1,2] <- 0;\n   sigmaV[1]<-0;\n   tauV[1]<-0;\n"
   
   Vzero.string = ""
   if(modelStructure$Vessel.zeroTows == "fixed") Vzero.string = paste("   pVdev[1] <- 0;\n   for(i in 2:nV) {\n      pVdev[i] ~ dunif(",logitBounds[1],",",logitBounds[2],");\n   }\n   vesselTau[2,1] <- 0;\n","   vesselTau[2,2] <- 0;\n   sigmaV[2]<-0;\n   tauV[2]<-0;\n",sep="")
   if(modelStructure$Vessel.zeroTows == "random") Vzero.string = paste("   for(i in 1:nV) {\n      pVdev[i] ~ dnorm(0,tauV[2])T(",logitBounds[1],",",logitBounds[2],");\n   }\n   vesselTau[2,1] <- 0;\n","   vesselTau[2,2] <- 0;\n   sigmaV[2] ~ dunif(0,100);\n   tauV[2]<-pow(sigmaV[2],-2);\n",sep="")
+  if(modelStructure$Vessel.zeroTows == "random2") Vzero.string = paste("   for(i in 1:nV) {\n      pVdev[i] ~ dnorm(0,tauV[2])T(",logitBounds[1],",",logitBounds[2],");\n   }\n   vesselTau[2,1] <- 0;\n","   vesselTau[2,2] <- 0;\n   sigmaV[2]<-pow(tauV[2],-1/2);\n   tauV[2]~dgamma(0.001,0.001);\n",sep="")
   if(modelStructure$Vessel.zeroTows == "randomExpanded") Vzero.string = paste(pVexpanded,"   vesselTau[2,1] <- 0;\n","   vesselTau[2,2] <- 0;\n   tauV[2]<-pow(sigmaV[2],-2);\n",sep="")
   if(modelStructure$Vessel.zeroTows == "zero") Vzero.string = "   for(i in 1:nV) {\n      pVdev[i] <- 0;\n   }\n   vesselTau[2,1] <- 0;\n   vesselTau[2,2] <- 0;\n   sigmaV[2]<-0;\n   tauV[2]<-0;\n"
   
