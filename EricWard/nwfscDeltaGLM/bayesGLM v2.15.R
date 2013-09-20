@@ -54,22 +54,22 @@ processData = function(Truncate=0) {
   Data = cbind(Data, 'effort2' = Data[,'effort']^2)
   Data = cbind(Data, 'logeffort2' = Data[,'logeffort']^2)  
 
-  # Exclude tows from strata that are not included
-  Exclude = which(is.na(Data$strata))
-  print(paste("Excluded ",length(Exclude)," observations that were not assigned to any strata",sep=""))
-  if(length(Exclude) > 0){
+  # Exclude_NoStratum tows from strata that are not included
+  Exclude_NoStratum = which(is.na(Data$strata))
+  print(paste("Exclude_NoStratumd ",length(Exclude_NoStratum)," observations that were not assigned to any strata",sep=""))
+  if(length(Exclude_NoStratum) > 0){
     print(paste("Observations that were not assigned to any strata are shown in 'Tows_outside_strata.csv'",sep=""))  
-    write.table(Data[Exclude,],"Tows_outside_strata.csv",row.names=F,col.names=T,sep=",")
-    Data = Data[-Exclude,]
+    write.table(Data[Exclude_NoStratum,],"Tows_outside_strata.csv",row.names=F,col.names=T,sep=",")
+    Data = Data[-Exclude_NoStratum,]
   }
   
-  # Exclude tows with some missing entry
-  Exclude = which(apply(Data, MARGIN=1, FUN=function(Vec){any(is.na(Vec))}))
-  print(paste("Excluded ",length(Exclude)," additional observations that had some missing data",sep=""))
-  write.table(Data[Exclude,],"Tows_with_missing_data.csv",row.names=F,col.names=T,sep=",")
-  if(length(Exclude) < 10 & length(Exclude) > 0) print(Data[Exclude,])
-  if(length(Exclude) >= 10) print("Entries are not printed to the screen due to having 10 or more")
-  if(length(Exclude) > 0) Data = Data[-Exclude,]
+  # Exclude_Missing tows with some missing entry
+  Exclude_Missing = which(apply(Data, MARGIN=1, FUN=function(Vec){any(is.na(Vec))}))
+  print(paste("Exclude_Missingd ",length(Exclude_Missing)," additional observations that had some missing data",sep=""))
+  write.table(Data[Exclude_Missing,],"Tows_with_missing_data.csv",row.names=F,col.names=T,sep=",")
+  if(length(Exclude_Missing) < 10 & length(Exclude_Missing) > 0) print(Data[Exclude_Missing,])
+  if(length(Exclude_Missing) >= 10) print("Entries are not printed to the screen due to having 10 or more")
+  if(length(Exclude_Missing) > 0) Data = Data[-Exclude_Missing,]
   
   # Count number of tows per strata and year
   TowsPerStrataYear = table(Data[,'strata'],Data[,'year'])
@@ -92,9 +92,6 @@ processData = function(Truncate=0) {
   # Attach and calculate other values that aren't in the data.frame
   #attach(Data)
   assign("Data", Data, envir = .GlobalEnv)
-  # create null matrices for covariates
-  assign("X.pos", matrix(0,1,1), envir = .GlobalEnv)
-  assign("X.bin", matrix(0,1,1), envir = .GlobalEnv)  
   #nonZeros = which(Data[,'isNonZeroTrawl']==TRUE)
   assign("nonZeros", which(Data[,'isNonZeroTrawl']==TRUE), envir = .GlobalEnv)
   # Number of elements
@@ -116,8 +113,18 @@ processData = function(Truncate=0) {
   assign("R",diag(2), envir = .GlobalEnv)
   
   # If the covariates aren't in the R environment, create them
-  if(is.null(X.bin)==TRUE) assign("Xbin",diag(2), envir = .GlobalEnv)
-  if(is.null(X.pos)==TRUE) assign("Xpos",diag(2), envir = .GlobalEnv)
+  if(!("X.bin" %in% ls(envir = .GlobalEnv))){
+    assign("X.bin",diag(2), envir = .GlobalEnv)
+  }else{
+    if(length(Exclude_NoStratum) > 0) X.bin = X.bin[-Exclude_NoStratum]
+    if(length(Exclude_Missing) > 0) X.bin = X.bin[-Exclude_Missing]
+  }
+  if(!("X.pos" %in% ls(envir = .GlobalEnv))){
+    assign("X.pos",diag(2), envir = .GlobalEnv)
+  }else{
+    if(length(Exclude_NoStratum) > 0) X.pos = X.pos[-Exclude_NoStratum]
+    if(length(Exclude_Missing) > 0) X.pos = X.pos[-Exclude_Missing]
+  }
   
   assign("log2pi",log(2*pi), envir = .GlobalEnv) # this is a constant for the LognormalECE2 model  
 }
@@ -571,8 +578,9 @@ fitCPUEModel = function(modelStructure = list("StrataYear.positiveTows" = "rando
   
   if(fit.model) {
 jags.params=c("Ydev","Sdev","SYdev","VYdev","pYdev","pSdev","pSYdev","pVYdev","B.zero","B.pos","sigmaSY","sigmaVY","sigmaV","CV","ratio","p.ece","yearTau","strataTau","strataYearTau","vesselYearTau","C.pos","C.bin","Vdev","pVdev")
-    jags.data = list("y","logy3","logy","log2pi","effort","effort2","logeffort", "logeffort2","nonZeros", "n", "isNonZeroTrawl", "nNonZeros", "nV","nVY", "nSY", "nS", "nY", "year", "vesselYear", "vessel","strata", "strataYear","zeros.vec","R","X.pos","X.bin")
+    jags.data = list("y","logy3","logy","log2pi","effort","effort2","logeffort", "logeffort2","nonZeros", "n", "isNonZeroTrawl", "nNonZeros", "nV","nVY", "nSY", "nS", "nY", "year", "vesselYear", "vessel","strata", "strataYear","zeros.vec","R","X.pos","X.bin","nX.binomial","nX.pos")
   
+    capture.output(jags.data, file="jags_data.txt")
     if(Parallel==TRUE) {
     	modelFit= jags.parallel(jags.data, inits = NULL, parameters.to.save= jags.params, model.file=model.name, n.chains = mcmc.control$chains, n.burnin = mcmc.control$burn, n.thin = mcmc.control$thin, n.iter = as.numeric(mcmc.control$burn+mcmc.control$iterToSave), DIC = TRUE)
     }
