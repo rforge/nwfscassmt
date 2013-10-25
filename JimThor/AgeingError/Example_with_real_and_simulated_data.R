@@ -72,6 +72,10 @@ for(RowI in 2:nrow(AgeReads)){
 
 ######## Determine settings for ADMB
 
+# Define minimum and maximum ages for integral across unobserved ages
+MinAge = 1
+MaxAge = ceiling(max(AgeReads2[,-1])/10)*10
+
 # Generate vector with settings for Bias 
 # One entry for each reader
 # -X = Mirror the parameters for reader X
@@ -90,11 +94,7 @@ BiasOpt = c(0,-1,0,-3)
 # 5 = Spline with estimated slope at beginning and end (Number of params = 2 + number of knots)
 # 6 = Linear interpolation (1st knot must be 1 and last knot must be MaxAge)
 SigOpt = c(1,-1,6,-3)
-KnotAges = list(NA, NA, c(1,10,20,40), NA)  # Necessary for option 5 or 6
-
-# Define minimum and maximum ages for integral across unobserved ages
-MinAge = 1
-MaxAge = ceiling(max(AgeReads2[,-1])/10)*10
+KnotAges = list(NA, NA, c(1,10,20,MaxAge), NA)  # Necessary for option 5 or 6
 
 # Run the model 
   #Data=AgeReads2; SigOpt=SigOpt; KnotAges=KnotAges; BiasOpt=BiasOpt; NDataSets=1; MinAge=MinAge; MaxAge=MaxAge; RefAge=10; MinusAge=1; PlusAge=30; SaveFile=DateFile; AdmbFile=SourceFile; EffSampleSize=0; Intern=FALSE; JustWrite=FALSE; CallType="shell"
