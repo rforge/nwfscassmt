@@ -96,7 +96,7 @@ BiasOpt = c(0,-1,0,-3)
 SigOpt = c(1,-1,6,-3)
 KnotAges = list(NA, NA, c(1,10,20,MaxAge), NA)  # Necessary for option 5 or 6
 
-# Run the model 
+# Run the model (MAY TAKE 5-10 MINUTES)
   #Data=AgeReads2; SigOpt=SigOpt; KnotAges=KnotAges; BiasOpt=BiasOpt; NDataSets=1; MinAge=MinAge; MaxAge=MaxAge; RefAge=10; MinusAge=1; PlusAge=30; SaveFile=DateFile; AdmbFile=SourceFile; EffSampleSize=0; Intern=FALSE; JustWrite=FALSE; CallType="shell"
 RunFn(Data=AgeReads2, SigOpt=SigOpt, KnotAges=KnotAges, BiasOpt=BiasOpt, NDataSets=1, MinAge=MinAge, MaxAge=MaxAge, RefAge=10, MinusAge=1, PlusAge=30, SaveFile=DateFile, AdmbFile=SourceFile, EffSampleSize=0, Intern=FALSE, JustWrite=FALSE, CallType="shell")
                  
