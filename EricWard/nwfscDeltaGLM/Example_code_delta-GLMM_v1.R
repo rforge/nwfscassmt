@@ -18,6 +18,7 @@ Letters = apply(MARGIN=1,FUN=paste,collapse="",expand.grid(letters,letters))
 DataFile = SourceFile
 setwd(SourceFile)
 
+
 # Load data and strata
 masterDat = read.csv(paste(DataFile,"Example_Species.csv",sep=""))
 #LoadFn(paste(DataFile,"RandomSpecies.dmp",sep=""))
