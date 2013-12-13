@@ -1,6 +1,0 @@
-#exportPattern("^[[:alpha:]]+")
-
-exportPattern(".")
-
-import(R2jags,runjags,coda,superdiag,pscl,statmod,stats)
-
