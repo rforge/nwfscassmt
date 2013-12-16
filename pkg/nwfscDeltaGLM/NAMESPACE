@@ -2,5 +2,5 @@
 
 exportPattern(".")
 
-import(R2jags,runjags,superdiag,pscl,statmod,stats)
+#import(R2jags,runjags,superdiag,pscl,statmod,stats)
 
