@@ -27,7 +27,8 @@
 # For MCMC samples, the total number of iterations returned will be (chains * iterToSave) / thin rate
 ###########################################################################################
 fitDeltaGLM = function(modelStructure = list("StrataYear.positiveTows" = "random","VesselYear.positiveTows" = "random","StrataYear.zeroTows" ="random","VesselYear.zeroTows" = "random", "Catchability.positiveTows" = "one", "Catchability.zeroTows" = "zero", "year.deviations" = "uncorrelated","strata.deviations" = "uncorrelated"),covariates=list(positive=FALSE,binomial=FALSE),likelihood = "gamma", model.name = "deltaGLM.txt", fit.model=TRUE, mcmc.control = list(chains = 5, thin = 1, burn = 5000, iterToSave = 2000),Parallel=TRUE, Species = "NULL",logitBounds = c(-20,20),logBounds = c(-20,20), prior.scale = rep(25,4)) {
-  
+  load.module("glm") # JAGS 
+  runif(1)
   if(modelStructure$Catchability.positiveTows%in%c("linear","quadratic") | modelStructure$Catchability.zeroTows%in%c("one","linear","quadratic")){
     print("Warning: index will not have comparable scale to a design-based (raw) index unless catchability.positiveTows equals 'one'  catchability.zeroTows equals 'zero'") 
   }
