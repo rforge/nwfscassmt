@@ -29,9 +29,9 @@ Thorson, J.T. and E.J. Ward. 2013. Accounting for space–time interactions in i
 }
 \keyword{ package }
 \seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
+%~~ Optional links to other man pages, e.g. ~~
+%~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
 }
 \examples{
-~~ simple examples of the most important functions ~~
+%~~ simple examples of the most important functions ~~
 }
