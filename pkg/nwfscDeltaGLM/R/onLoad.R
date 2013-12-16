@@ -1,6 +1,12 @@
 .onLoad = function(libname, pkgname){
 # load default data into workspace
-library(R2jags)
+require(R2jags)
+require(runjags)
+require(superdiag)
+require(pscl)
+require(statmod)
+require(stats)
+
 runif(1)
 load.module("glm")
 options(stringsAsFactors=TRUE)
