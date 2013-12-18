@@ -1,5 +1,6 @@
 .onLoad = function(libname, pkgname){
 # load default data into workspace
+require(rjags)
 require(R2jags)
 require(runjags)
 require(superdiag)
