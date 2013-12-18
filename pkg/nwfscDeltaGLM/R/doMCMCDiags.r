@@ -4,7 +4,6 @@ doMCMCDiags = function(directory, mods, McmcDiagnostics=FALSE) {
   
   # Identify strata and year for StratYear values
   StrataTable = data.frame( 'strataYear'=levels(strataYear), 'strata'=sapply(levels(strataYear),FUN=function(Char){strsplit(Char,":")[[1]][1]}), 'year'=sapply(levels(strataYear),FUN=function(Char){strsplit(Char,":")[[1]][2]}), 'Area_Hectares'=rep(NA,nlevels(strataYear)))
-  SA3 = read.csv(paste(directory,"SA3.csv",sep=""))
   for(i in 1:nrow(StrataTable)){
     Row = which(strata.limits[,'STRATA']==StrataTable[i,'strata'])
     StrataTable[i,'Area_Hectares'] = sum(SA3[SA3[,'MAX_LAT_DD']<=strata.limits[Row,'NLat'] & SA3[,'MIN_LAT_DD']>=strata.limits[Row,'SLat'] & SA3[,'MIN_DEPTH_M']>=strata.limits[Row,'MinDepth'] & SA3[,'MAX_DEPTH_M']<=strata.limits[Row,'MaxDepth'],'AREA_HECTARES'])
