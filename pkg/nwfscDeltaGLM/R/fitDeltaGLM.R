@@ -26,7 +26,7 @@
 
 # For MCMC samples, the total number of iterations returned will be (chains * iterToSave) / thin rate
 ###########################################################################################
-fitDeltaGLM = function(modelStructure = list("StrataYear.positiveTows" = "random","VesselYear.positiveTows" = "random","StrataYear.zeroTows" ="random","VesselYear.zeroTows" = "random", "Catchability.positiveTows" = "one", "Catchability.zeroTows" = "zero", "year.deviations" = "uncorrelated","strata.deviations" = "uncorrelated"),covariates=list(positive=FALSE,binomial=FALSE),likelihood = "gamma", model.name = "deltaGLM.txt", fit.model=TRUE, mcmc.control = list(chains = 5, thin = 1, burn = 5000, iterToSave = 2000),Parallel=TRUE, Species = "NULL",logitBounds = c(-20,20),logBounds = c(-20,20), prior.scale = rep(25,4), dgammaNum=0.001) {
+fitDeltaGLM = function(modelStructure = list("StrataYear.positiveTows" = "random","VesselYear.positiveTows" = "random","StrataYear.zeroTows" ="random","VesselYear.zeroTows" = "random", "Vessel.positiveTows"="zero","Vessel.zeroTows"="zero", "Catchability.positiveTows" = "one", "Catchability.zeroTows" = "zero", "year.deviations" = "uncorrelated","strata.deviations" = "uncorrelated"),covariates=list(positive=FALSE,binomial=FALSE),likelihood = "gamma", model.name = "deltaGLM.txt", fit.model=TRUE, write.model=TRUE, mcmc.control = list(chains = 5, thin = 1, burn = 5000, iterToSave = 2000),Parallel=TRUE, Species = "NULL",logitBounds = c(-20,20),logBounds = c(-20,20), prior.scale = rep(25,6), dgammaNum=0.001) {
   load.module("glm") # JAGS 
   runif(1)
   if(modelStructure$Catchability.positiveTows%in%c("linear","quadratic") | modelStructure$Catchability.zeroTows%in%c("one","linear","quadratic")){
@@ -37,8 +37,8 @@ fitDeltaGLM = function(modelStructure = list("StrataYear.positiveTows" = "random
     print("Warning: system OS is non-windows, and running in parallel is currently not supported. Code will run in non-parallel")
     Parallel = FALSE
   }
-  if(length(prior.scale) != 4 | length(which(is.na(prior.scale)==T)) > 0 | length(which(prior.scale <= 0)) > 0) {
-    print("Error: prior.scale needs to be specified as a 4-element vector, of positive values")
+  if(length(prior.scale) != 6 | length(which(is.na(prior.scale)==T)) > 0 | length(which(prior.scale <= 0)) > 0) {
+    print("Error: prior.scale needs to be specified as a 6-element vector, of positive values")
     stop()
   }
   if(Species == "NULL") {
@@ -53,6 +53,14 @@ fitDeltaGLM = function(modelStructure = list("StrataYear.positiveTows" = "random
     print("Error: you specified only Vessel Year deviations for positive model to be correlated. You need to either (1) specify both as correlated or (2) specify neither as correlated")
     stop()	
   }
+  if(modelStructure$Vessel.zeroTows =="correlated" & modelStructure$Vessel.positiveTows != "correlated") {
+  	print("Error: you specified only Vessel deviations for binomial model to be correlated. You need to either (1) specify both as correlated or (2) specify neither as correlated")
+  	stop()	
+  }
+  if(modelStructure$Vessel.zeroTows !="correlated" & modelStructure$Vessel.positiveTows == "correlated") {
+  	print("Error: you specified only Vessel deviations for positive model to be correlated. You need to either (1) specify both as correlated or (2) specify neither as correlated")
+  	stop()	
+  }  
   if(modelStructure$StrataYear.zeroTows =="correlated" & modelStructure$StrataYear.positiveTows != "correlated") {
     print("Error: you specified only Strata Year deviations for binomial model to be correlated. You need to either (1) specify both as correlated or (2) specify neither as correlated")
     stop()	
@@ -91,7 +99,7 @@ fitDeltaGLM = function(modelStructure = list("StrataYear.positiveTows" = "random
   }
   
   #################################################################
-  # These 4 strings are all new, relevant for implementing the variance manipulated/expanded method described in Gelman et al. 2007, 
+  # These 6 strings are all new, relevant for implementing the variance manipulated/expanded method described in Gelman et al. 2007, 
   # Gelman et al. 2006. The prior implicit on random effects is the non-central folded t distribution from Gelman et al. 2006
   SYexpanded = paste("   tau.xi[1] <- pow(",prior.scale[1],", -2);\n","   xi[1] ~ dnorm (0, tau.xi[1]);\n",
                      "tau.eta[1] ~ dgamma(0.5, 0.5); # chi^2 with 1 d.f.\n","sigmaSY[1] <- abs(xi[1])/sqrt(tau.eta[1]); # derived, cauchy = normal/sqrt(chi^2)\n",
@@ -225,7 +233,7 @@ fitDeltaGLM = function(modelStructure = list("StrataYear.positiveTows" = "random
       likelihood.string = paste("      u.nz[i] <- inprod(C.pos[1:nX.pos],X.pos[i,]) + Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]];\n", "      y[nonZeros[i]] ~ dlnorm(u.nz[i],tau[1]);\n",sep="")
     }
     
-    prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   sigma[1] <- sqrt(log(pow(CV[1],2)+1));\n   tau[1] <- pow(sigma[1],-2);\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"
+    prior.string = paste("   oneOverCV2[1] ~ dgamma(",dgammaNum,",",dgammaNum,");\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   sigma[1] <- sqrt(log(pow(CV[1],2)+1));\n   tau[1] <- pow(sigma[1],-2);\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n",sep="")
     if(likelihood == "lognormalFixedCV") {
       prior.string = "   oneOverCV2[1] <- 1;\n   CV[1] <- 1;\n   CV[2] <- 0;\n   sigma[1] <- 1;\n   tau[1] <- 1;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"	
     }
@@ -243,7 +251,7 @@ fitDeltaGLM = function(modelStructure = list("StrataYear.positiveTows" = "random
     
     # for lognormal, gamma prior on 1/sigma2 = 1/CV2. To keep things consistent, gamma prior on a = 1/cv2, b/c CV = 1/sqrt(a)
     # then gamma.b[i] = gamma.a / u[i]
-    prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   gamma.a[1] <- oneOverCV2[1];\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"
+    prior.string = paste("   oneOverCV2[1] ~ dgamma(",dgammaNum,",",dgammaNum,");\n   gamma.a[1] <- oneOverCV2[1];\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n",sep="")
     if(likelihood == "gammaFixedCV") {
       prior.string = "   oneOverCV2[1] <- 1;\n   gamma.a[1] <- oneOverCV2[1];\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"  		
     }	
@@ -257,7 +265,7 @@ fitDeltaGLM = function(modelStructure = list("StrataYear.positiveTows" = "random
       likelihood.string = paste("      u.nz[i] <- exp(min(inprod(C.pos[1:nX.pos],X.pos[i,]) + Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]],100));\n","      lambda[i] <- u.nz[i]*oneOverCV2[1];\n","      scaledLogLike[i] <- -(0.5*log(lambda[i]) - 0.5*logy3[nonZeros[i]] - lambda[i]*pow((y[nonZeros[i]]-u.nz[i]),2)/(2*u.nz[i]*u.nz[i]*y[nonZeros[i]])) + 10000;\n","      ones.vec[i] ~ dpois(scaledLogLike[i]);\n")
     } 	
     
-    prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"	
+    prior.string = paste("   oneOverCV2[1] ~ dgamma(",dgammaNum,",",dgammaNum,");\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n",sep="")	
     if(likelihood == "invGaussianFixedCV") prior.string = "   oneOverCV2[1] <- 1;\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"
   }
   
@@ -293,7 +301,7 @@ fitDeltaGLM = function(modelStructure = list("StrataYear.positiveTows" = "random
       # modify the likelihood string to include covariates for the positive tows
       likelihood.string = paste("      u.nz[i] <- exp(inprod(C.pos[1:nX.pos],X.pos[i,]) + Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]]);\n", "nbp[i] <- oneOverCV2[1]*(1/u.nz[i]);\n","nbr[i] <- u.nz[i]*nbp[i]/(1-nbp[i]);\n", "      y[nonZeros[i]] ~ dnegbin(nbp[i],nbr[i]);\n",sep="")
     }
-    prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n"	
+    prior.string = paste("   oneOverCV2[1] ~ dgamma(",dgammaNum,",",dgammaNum,");\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   CV[2] <- 0;\n   ratio <- 0;\n   p.ece[1] <- 0;\n   p.ece[2] <- 0;\n",sep="")	
   }
   
   if(likelihood == "lognormalECE") {
@@ -307,7 +315,7 @@ fitDeltaGLM = function(modelStructure = list("StrataYear.positiveTows" = "random
       likelihood.string = paste("      G[i] ~ dcat(p.ece[1:2]);\n      u.nz[i] <- (G[i]-1)*logratio + (inprod(C.pos[1:nX.pos],X.pos[i,]) + Sdev[strata[nonZeros[i]]] + Ydev[year[nonZeros[i]]] + VYdev[vesselYear[nonZeros[i]]] + Vdev[vessel[nonZeros[i]]] + SYdev[strataYear[nonZeros[i]]] + B.pos[1]*logeffort[nonZeros[i]] + B.pos[2]*logeffort2[nonZeros[i]]);\n", "      y[nonZeros[i]] ~ dlnorm(u.nz[i],tau[G[i]]);\n",sep="")
     }
     # for the ECE model, the normal and extreme distributions each get a separate variance
-    prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   sigma[1] <- sqrt(log(pow(CV[1],2)+1));\n   tau[1] <- pow(sigma[1],-2);\n   oneOverCV2[2] ~ dgamma(0.001,0.001);\n   CV[2] <- 1/sqrt(oneOverCV2[2]);\n   sigma[2] <- sqrt(log(pow(CV[2],2)+1));\n   tau[2] <- pow(sigma[2],-2);\n   logratio ~ dunif(0,5);\n   ratio <- exp(logratio);\n   alpha.ece[1] <- 1;\n   alpha.ece[2] <- 1;\n   p.ece[1:2] ~ ddirch(alpha.ece[1:2]);\n"
+    prior.string = paste("   oneOverCV2[1] ~ dgamma(",dgammaNum,",",dgammaNum,")\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   sigma[1] <- sqrt(log(pow(CV[1],2)+1));\n   tau[1] <- pow(sigma[1],-2);\n   oneOverCV2[2] ~ dgamma(",dgammaNum,",",dgammaNum,");\n   CV[2] <- 1/sqrt(oneOverCV2[2]);\n   sigma[2] <- sqrt(log(pow(CV[2],2)+1));\n   tau[2] <- pow(sigma[2],-2);\n   logratio ~ dunif(0,5);\n   ratio <- exp(logratio);\n   alpha.ece[1] <- 1;\n   alpha.ece[2] <- 1;\n   p.ece[1:2] ~ ddirch(alpha.ece[1:2]);\n",sep="")
   }
   if(likelihood == "lognormalECE2") {
   	# CV is sqrt(exp(sig2)-1) which is approx ~ sigma. Each tow is treated as discrete group (normal, ECE)
@@ -335,7 +343,7 @@ fitDeltaGLM = function(modelStructure = list("StrataYear.positiveTows" = "random
     }
     # for lognormal, gamma prior on 1/sigma2 = 1/CV2. To keep things consistent, gamma prior on a = 1/cv2, b/c CV = 1/sqrt(a)
     # then gamma.b[i] = gamma.a / u[i]
-    prior.string = "   oneOverCV2[1] ~ dgamma(0.001,0.001);\n   gamma.a[1] <- oneOverCV2[1];\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   oneOverCV2[2] ~ dgamma(0.001,0.001);\n   gamma.a[2] <- oneOverCV2[2];\n   CV[2] <- 1/sqrt(oneOverCV2[2]);\n   logratio ~ dunif(0,5);\n   ratio <- exp(logratio);\n   alpha.ece[1] <- 1;\n   alpha.ece[2] <- 1;\n   p.ece[1:2] ~ ddirch(alpha.ece[1:2]);\n"
+    prior.string = paste("   oneOverCV2[1] ~ dgamma(",dgammaNum,",",dgammaNum,");\n   gamma.a[1] <- oneOverCV2[1];\n   CV[1] <- 1/sqrt(oneOverCV2[1]);\n   oneOverCV2[2] ~ dgamma(",dgammaNum,",",dgammaNum,");\n   gamma.a[2] <- oneOverCV2[2];\n   CV[2] <- 1/sqrt(oneOverCV2[2]);\n   logratio ~ dunif(0,5);\n   ratio <- exp(logratio);\n   alpha.ece[1] <- 1;\n   alpha.ece[2] <- 1;\n   p.ece[1:2] ~ ddirch(alpha.ece[1:2]);\n",sep="")
   }
   if(likelihood == "gammaECE2") {
   	# gamma in this instance is parameterized in terms of the rate and shape, with mean = a/b, var = a/b2, and CV = 1/sqrt(a)
@@ -436,15 +444,16 @@ fitDeltaGLM = function(modelStructure = list("StrataYear.positiveTows" = "random
       }
       ",sep="")
   # write this to text file
-  cat(deltaGLM, file = model.name)
+  if(write.model) cat(deltaGLM, file = model.name)
   
   # fit the model and return the model object
   modelFit = NA
   
   if(fit.model) {
     jags.params=c("Ydev","Sdev","SYdev","Vdev","VYdev","pYdev","pSdev","pSYdev","pVdev","pVYdev","B.zero","B.pos","sigmaSY","sigmaV","sigmaVY","CV","ratio","p.ece","yearTau","strataTau","strataYearTau","vesselTau","vesselYearTau","C.pos","C.bin")
-    jags.data = list("y","logy3","lfacty","effort","effort2","logeffort", "logeffort2","nonZeros", "n", "isNonZeroTrawl", "nNonZeros", "nVY", "nSY", "nS", "nY", "year", "vesselYear", "strata", "strataYear","ones.vec","R","X.pos","X.bin")
+    jags.data = list("y","logy3","lfacty","effort","effort2","logeffort", "logeffort2","nonZeros", "n", "isNonZeroTrawl", "nNonZeros", "nV", "nVY", "nSY", "nS", "nY", "year", "vessel", "vesselYear", "strata", "strataYear","ones.vec","R","X.pos","X.bin")
     
+    capture.output(jags.data, file="jags_data.txt")
     if(Parallel==TRUE) {
       modelFit= jags.parallel(jags.data, inits = NULL, parameters.to.save= jags.params, model.file=model.name, n.chains = mcmc.control$chains, n.burnin = mcmc.control$burn, n.thin = mcmc.control$thin, n.iter = as.numeric(mcmc.control$burn+mcmc.control$iterToSave), DIC = TRUE)
     }
