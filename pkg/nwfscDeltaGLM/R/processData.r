@@ -33,6 +33,7 @@ processData = function(Truncate=0) {
   Data = cbind(Data, 'isNonZeroTrawl'=ifelse(Data[,'y']>0,1,0))
   Data = cbind(Data, 'ones.vec'=rep(0,length(Data[,'y']))) # this is just for the 'ones-trick', inv Gaussian 
   Data = cbind(Data, 'logy3'=log(pi*2*(Data[,'y']^3))) # this is a constant for the invGaussian
+  Data = cbind(Data, 'logy'=log((Data[,'y']))) # this is a constant for the LognormalECE2 model
   Data = cbind(Data, 'logeffort'=log(Data[,'effort']))
   Data = cbind(Data, 'effort2' = Data[,'effort']^2)
   Data = cbind(Data, 'logeffort2' = Data[,'logeffort']^2)  
