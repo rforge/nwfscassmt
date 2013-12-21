@@ -451,7 +451,7 @@ fitDeltaGLM = function(modelStructure = list("StrataYear.positiveTows" = "random
   
   if(fit.model) {
     jags.params=c("Ydev","Sdev","SYdev","Vdev","VYdev","pYdev","pSdev","pSYdev","pVdev","pVYdev","B.zero","B.pos","sigmaSY","sigmaV","sigmaVY","CV","ratio","p.ece","yearTau","strataTau","strataYearTau","vesselTau","vesselYearTau","C.pos","C.bin")
-    jags.data = list("y","logy3","lfacty","effort","effort2","logeffort", "logeffort2","nonZeros", "n", "isNonZeroTrawl", "nNonZeros", "nV", "nVY", "nSY", "nS", "nY", "year", "vessel", "vesselYear", "strata", "strataYear","ones.vec","R","X.pos","X.bin","nX.binomial","nX.pos")
+    jags.data = list("y","logy","logy3","lfacty","effort","effort2","logeffort", "logeffort2","nonZeros", "n", "isNonZeroTrawl", "nNonZeros", "nV", "nVY", "nSY", "nS", "nY", "year", "vessel", "vesselYear", "strata", "strataYear","ones.vec","R","X.pos","X.bin","nX.binomial","nX.pos")
     
     capture.output(jags.data, file="jags_data.txt")
     if(Parallel==TRUE) {
