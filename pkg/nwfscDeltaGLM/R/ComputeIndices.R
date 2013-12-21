@@ -1,7 +1,7 @@
 #########
 # Compute index of abundance
 #########
-ComputeIndices = function(Data, Model, FileName, maxDims=6, Folder=NA, Weights="StrataAreas", StrataTable){
+ComputeIndices = function(Data, Model, FileName, maxDims=6, Folder=NA, Weights="StrataAreas", StrataTable, PlotStrataYearMcmc=TRUE){
   if(is.na(Folder)) Folder = paste(getwd(),"/",sep="")  
   
   # Attach stuff -- listed by search()
@@ -22,37 +22,37 @@ ComputeIndices = function(Data, Model, FileName, maxDims=6, Folder=NA, Weights="
   for(YearI in 1:nrow(PosMean)){
     for(StratI in 1:ncol(PosMean)){
       # Derived indicators
-      StrataYearI = which(levels(strataYear)==paste(toupper(letters[StratI]),":",levels(year)[YearI],sep=""))
+      StrataYearI = which(levels(strataYear)==paste(toupper(levels(strata)[StratI]),":",levels(year)[YearI],sep=""))
       AreaI = which(StrataTable[,'strataYear']==paste(levels(strata)[StratI],":",levels(year)[YearI],sep=""))
-      Which = which(strata==toupper(letters[StratI]) & year==levels(year)[YearI])
+      Which = which(strata==levels(strata)[StratI] & year==levels(year)[YearI])
       # Year, strata, and area
       Year[YearI,StratI] = levels(year)[YearI]
-      Strata[YearI,StratI] = toupper(letters[StratI])
+      Strata[YearI,StratI] = levels(strata)[StratI]
       if(Weights=="StrataAreas") Area[YearI,StratI] = StrataTable[AreaI,'Area_Hectares']
       if(Weights=="Equal") Area[YearI,StratI] = 1
       # Save Positive catch chain in normal-space and correct for transformation biases
       Chains[,YearI,StratI,1] = exp( cMx(Sdev)[,StratI] + cMx(Ydev)[,YearI] + cMx(SYdev)[,StrataYearI] + log(1)*B.pos[,1] + log(1)^2*B.pos[,2] ) # wardJAGS uses logeffort offset
-      # Lognormal -- Bias correction 
-      if(Dist=="lognormal"){
-        Sigma = sqrt(log(CV[,1]^2+1))        
-        Chains[,YearI,StratI,1] = Chains[,YearI,StratI,1] * exp(Sigma^2/2)
-      }
-      # LognormalECE -- Bias correction + incorporate ECE
-      if(Dist=="lognormalECE"){
-        Sigma = sqrt(log(CV[,1]^2+1))        
-        Sigma2 = sqrt(log(CV[,2]^2+1))        
-        Chains[,YearI,StratI,1] = Chains[,YearI,StratI,1]*exp(Sigma^2/2)*p.ece[,1] + ratio*Chains[,YearI,StratI,1]*exp(Sigma2^2/2)*p.ece[,2]
-      }
-      # GammaECE -- incorporate ECE 
-      if(Dist=="gammaECE"){
-        Chains[,YearI,StratI,1] = Chains[,YearI,StratI,1]*p.ece[,1] + ratio*Chains[,YearI,StratI,1]*p.ece[,2]
-      }
-      # Don't make mean-unbiased for unobserved vessel
-      #if(modelStructure$VesselYear.positiveTows=="random") Chains[,YearI,StratI,1] = Chains[,YearI,StratI,1] * exp(sigmaVY[,1]^2/2)
+        # Lognormal -- Bias correction 
+        if(Dist=="lognormal"){
+          Sigma = sqrt(log(CV[,1]^2+1))        
+          Chains[,YearI,StratI,1] = Chains[,YearI,StratI,1] * exp(Sigma^2/2)
+        }
+        # LognormalECE -- Bias correction + incorporate ECE
+        if(Dist=="lognormalECE"){
+          Sigma = sqrt(log(CV[,1]^2+1))        
+          Sigma2 = sqrt(log(CV[,2]^2+1))        
+          Chains[,YearI,StratI,1] = Chains[,YearI,StratI,1]*exp(Sigma^2/2)*p.ece[,1] + ratio*Chains[,YearI,StratI,1]*exp(Sigma2^2/2)*p.ece[,2]
+        }
+        # GammaECE -- incorporate ECE 
+        if(Dist=="gammaECE"){
+          Chains[,YearI,StratI,1] = Chains[,YearI,StratI,1]*p.ece[,1] + ratio*Chains[,YearI,StratI,1]*p.ece[,2]
+        }
+        # Don't make mean-unbiased for unobserved vessel
+        #if(modelStructure$VesselYear.positiveTows=="random") Chains[,YearI,StratI,1] = Chains[,YearI,StratI,1] * exp(sigmaVY[,1]^2/2)
       # Save Presence/Absence chain in normal-space and correct for transformation biases
       Chains[,YearI,StratI,2] = plogis( cMx(pSdev)[,StratI] + cMx(pYdev)[,YearI] + cMx(pSYdev)[,StrataYearI] + (1)*B.zero[,1] + (1)^2*B.zero[,2] )   # wardJAGS predicts the probability of 0 catch, and uses offset as effort, not logeffort
-      # Don't make mean-unbiased for unobserved vessel (this was done incorrectly anyway)
-      #if(modelStructure$VesselYear.zeroTows=="random") Chains[,YearI,StratI,2] = mean(plogis(rnorm(n=dim(Chains)[1]*1e3, mean=qlogis(Chains[,YearI,StratI,2]), sd=sigmaVY[,2])))
+        # Don't make mean-unbiased for unobserved vessel (this was done incorrectly anyway)
+        #if(modelStructure$VesselYear.zeroTows=="random") Chains[,YearI,StratI,2] = mean(plogis(rnorm(n=dim(Chains)[1]*1e3, mean=qlogis(Chains[,YearI,StratI,2]), sd=sigmaVY[,2])))
       # Index (median)
       PosMedian[YearI,StratI] = median( Chains[,YearI,StratI,1] )  # / 2e4 # Convert kilograms to metric tons
       PresMedian[YearI,StratI] = median( Chains[,YearI,StratI,2] )   
@@ -85,31 +85,33 @@ ComputeIndices = function(Data, Model, FileName, maxDims=6, Folder=NA, Weights="
     Temp = Area[YearI,StratI] * rowSums( cMx(Chains[,YearI,,1]) * cMx(Chains[,YearI,,2]) )
     SdLogYear[YearI] = sd(log(Temp))
   } # 1085-115
-  
+
   # Plot MCMC chains for each Strata:Year
-  for(Type in c("Trace","ACF")){
-    for(ChainI in 1:2){
-      Nstrat = length(unique(strataYear[nonZeros]))
-      Nplots = ceiling( Nstrat / maxDims^2 )
-      for(PlotI in 1:Nplots){
-        ParSet = (PlotI-1)*maxDims^2 + 1:min(Nstrat-(PlotI-1)*maxDims^2,maxDims^2)
-        Ncol=ceiling(sqrt(length(ParSet)))
-        Nrow = ceiling(length(ParSet)/Ncol)
-        jpeg(paste(Folder,"/",FileName,"Chain_",c("Positive","Presence")[ChainI],"_",Type,"_by_StrataYear_",PlotI,".jpg",sep=""),width=Ncol*1.5,height=Nrow*1.5,res=150,units="in")
-        par(mfrow=c(Nrow,Ncol), mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02)
-        for(StrataYearI in ParSet){
-          StrataI = strata[which(strataYear==unique(strataYear)[StrataYearI])[1]]
-          YearI = year[which(strataYear==unique(strataYear)[StrataYearI])[1]]
-          Mat = matrix(Chains[,YearI,StrataI,ChainI],ncol=Model$mcmc.control$chains,byrow=FALSE)
-          if(Type=="Trace"){
-            matplot(Mat, type="l", lty="solid", col=rainbow(Model$mcmc.control$chains,alpha=0.4), main=paste(YearI,StrataI), xaxt="n", xlab="",ylab="")
-          }
-          if(Type=="ACF"){
-            Acf = apply(Mat,MARGIN=2,FUN=function(Vec){acf(Vec,plot=FALSE)$acf})
-            matplot(Acf, type="h", lty="solid", col=rainbow(Model$mcmc.control$chains,alpha=0.4), main=paste(YearI,StrataI), xaxt="n", xlab="",ylab="", ylim=c(0,1), lwd=2)
-          }
+  if(PlotStrataYearMcmc == TRUE){
+    for(Type in c("Trace","ACF")){
+      for(ChainI in 1:2){
+        Nstrat = length(unique(strataYear[nonZeros]))
+        Nplots = ceiling( Nstrat / maxDims^2 )
+        for(PlotI in 1:Nplots){
+          ParSet = (PlotI-1)*maxDims^2 + 1:min(Nstrat-(PlotI-1)*maxDims^2,maxDims^2)
+          Ncol=ceiling(sqrt(length(ParSet)))
+          Nrow = ceiling(length(ParSet)/Ncol)
+          jpeg(paste(Folder,"/",FileName,"Chain_",c("Positive","Presence")[ChainI],"_",Type,"_by_StrataYear_",PlotI,".jpg",sep=""),width=Ncol*1.5,height=Nrow*1.5,res=150,units="in")
+            par(mfrow=c(Nrow,Ncol), mar=c(2,2,2,0), mgp=c(1.25,0.25,0), tck=-0.02)
+            for(StrataYearI in ParSet){
+              StrataI = strata[which(strataYear==unique(strataYear)[StrataYearI])[1]]
+              YearI = year[which(strataYear==unique(strataYear)[StrataYearI])[1]]
+              Mat = matrix(Chains[,YearI,StrataI,ChainI],ncol=Model$mcmc.control$chains,byrow=FALSE)
+              if(Type=="Trace"){
+                matplot(Mat, type="l", lty="solid", col=rainbow(Model$mcmc.control$chains,alpha=0.4), main=paste(YearI,StrataI), xaxt="n", xlab="",ylab="")
+              }
+              if(Type=="ACF"){
+                Acf = apply(Mat,MARGIN=2,FUN=function(Vec){acf(Vec,plot=FALSE)$acf})
+                matplot(Acf, type="h", lty="solid", col=rainbow(Model$mcmc.control$chains,alpha=0.4), main=paste(YearI,StrataI), xaxt="n", xlab="",ylab="", ylim=c(0,1), lwd=2)
+              }
+            }
+          dev.off()
         }
-        dev.off()
       }
     }
   }
@@ -125,8 +127,9 @@ ComputeIndices = function(Data, Model, FileName, maxDims=6, Folder=NA, Weights="
   # Write and print output
   write.csv(Results1,file=paste(Folder,"/",FileName,"ResultsByYearAndStrata.csv",sep=""))
   write.csv(Results2,file=paste(Folder,"/",FileName,"ResultsByYear.csv",sep=""))
-  
+
   # Return output
   Return = list(Results1=Results1, Results2=Results2)
   return(Return)
 }
+
