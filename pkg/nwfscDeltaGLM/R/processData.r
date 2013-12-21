@@ -96,7 +96,7 @@ processData = function(Truncate=0) {
   # Diagonal matrix for the wishart / correlation model
   assign("R",diag(2), envir = .GlobalEnv)
   # Necessary for ECE2 distributions
-  assign("logy",diag(2), envir = .GlobalEnv)
+  assign("logy",logy, envir = .GlobalEnv)
 
   # If the covariates aren't in the R environment, create them
   if(!("X.bin" %in% ls(envir = .GlobalEnv))){
