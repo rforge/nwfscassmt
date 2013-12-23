@@ -16,41 +16,41 @@ PosteriorPredictive = function(Data, Model, maxDims=6, FileName, Folder=NA){
   if(Dist=="lognormal"){
     sigma = sqrt(log(1+(CV[,1]^2)))
     for(i in 1:length(nonZeros)){
-      u.nz[,i] <- exp( cMx(Sdev)[,strata[nonZeros[i]]] + Ydev[,year[nonZeros[i]]] + VYdev[,vesselYear[nonZeros[i]]] + SYdev[,strataYear[nonZeros[i]]] + B.pos[,1]*logeffort[nonZeros[i]] + B.pos[,2]*logeffort2[nonZeros[i]] )
+      u.nz[,i] <- exp( cMx(Sdev)[,strata[nonZeros[i]]] + Ydev[,year[nonZeros[i]]] + VYdev[,vesselYear[nonZeros[i]]] + Vdev[,vessel[nonZeros[i]]] + SYdev[,strataYear[nonZeros[i]]] + B.pos[,1]*logeffort[nonZeros[i]] + B.pos[,2]*logeffort2[nonZeros[i]] )
     }
   }
   if(Dist=="gamma"){
     gamma.a = oneOverCV2 = 1/(CV[,1]^2)
     for(i in 1:length(nonZeros)){
-      Temp = cMx(Sdev)[,strata[nonZeros[i]]] + Ydev[,year[nonZeros[i]]] + VYdev[,vesselYear[nonZeros[i]]] + SYdev[,strataYear[nonZeros[i]]] + B.pos[,1]*logeffort[nonZeros[i]] + B.pos[,2]*logeffort2[nonZeros[i]]
+      Temp = cMx(Sdev)[,strata[nonZeros[i]]] + Ydev[,year[nonZeros[i]]] + VYdev[,vesselYear[nonZeros[i]]] + Vdev[,vessel[nonZeros[i]]] + SYdev[,strataYear[nonZeros[i]]] + B.pos[,1]*logeffort[nonZeros[i]] + B.pos[,2]*logeffort2[nonZeros[i]]
       u.nz[,i] <- exp( ifelse(Temp>100,100,Temp) ) # Eric included this in the JAGS code
     }
   }
   if(Dist=="invGaussian"){
     oneOverCV2 = 1/(CV[,1]^2)
     for(i in 1:length(nonZeros)){
-      Temp = cMx(Sdev)[,strata[nonZeros[i]]] + Ydev[,year[nonZeros[i]]] + VYdev[,vesselYear[nonZeros[i]]] + SYdev[,strataYear[nonZeros[i]]] + B.pos[,1]*logeffort[nonZeros[i]] + B.pos[,2]*logeffort2[nonZeros[i]]
+      Temp = cMx(Sdev)[,strata[nonZeros[i]]] + Ydev[,year[nonZeros[i]]] + VYdev[,vesselYear[nonZeros[i]]] + Vdev[,vessel[nonZeros[i]]] + SYdev[,strataYear[nonZeros[i]]] + B.pos[,1]*logeffort[nonZeros[i]] + B.pos[,2]*logeffort2[nonZeros[i]]
       u.nz[,i] <- exp( ifelse(Temp>100,100,Temp) ) # Eric included this in the JAGS code
     }
   }
-  if(Dist=="lognormalECE"){
+  if(Dist=="lognormalECE" | Dist=="lognormalECE2"){
     u.nz2 = array(NA, dim=dim(u.nz))
     sigma = sqrt(log(1+(CV[,1]^2)))
     sigma2 = sqrt(log(1+(CV[,2]^2)))
     for(i in 1:length(nonZeros)){
-      Temp = cMx(Sdev)[,strata[nonZeros[i]]] + Ydev[,year[nonZeros[i]]] + VYdev[,vesselYear[nonZeros[i]]] + SYdev[,strataYear[nonZeros[i]]] + B.pos[,1]*logeffort[nonZeros[i]] + B.pos[,2]*logeffort2[nonZeros[i]]
+      Temp = cMx(Sdev)[,strata[nonZeros[i]]] + Ydev[,year[nonZeros[i]]] + VYdev[,vesselYear[nonZeros[i]]] + Vdev[,vessel[nonZeros[i]]] + SYdev[,strataYear[nonZeros[i]]] + B.pos[,1]*logeffort[nonZeros[i]] + B.pos[,2]*logeffort2[nonZeros[i]]
       u.nz[,i] <- exp( ifelse(Temp>100,100,Temp) ) # Eric included this in the JAGS code
     }
     for(i in 1:length(nonZeros)){
       u.nz2[,i] <- u.nz[,i] * ratio
     }
   }
-  if(Dist=="gammaECE"){
+  if(Dist=="gammaECE" | Dist=="gammaECE2"){
     u.nz2 = array(NA, dim=dim(u.nz))
     gamma.a = 1/(CV[,1]^2)
     gamma.a2 = 1/(CV[,2]^2)    
     for(i in 1:length(nonZeros)){
-      Temp = cMx(Sdev)[,strata[nonZeros[i]]] + Ydev[,year[nonZeros[i]]] + VYdev[,vesselYear[nonZeros[i]]] + SYdev[,strataYear[nonZeros[i]]] + B.pos[,1]*logeffort[nonZeros[i]] + B.pos[,2]*logeffort2[nonZeros[i]]
+      Temp = cMx(Sdev)[,strata[nonZeros[i]]] + Ydev[,year[nonZeros[i]]] + VYdev[,vesselYear[nonZeros[i]]] + Vdev[,vessel[nonZeros[i]]] + SYdev[,strataYear[nonZeros[i]]] + B.pos[,1]*logeffort[nonZeros[i]] + B.pos[,2]*logeffort2[nonZeros[i]]
       u.nz[,i] <- exp( ifelse(Temp>100,100,Temp) ) # Eric included this in the JAGS code
     }
     for(i in 1:length(nonZeros)){
@@ -85,11 +85,11 @@ PosteriorPredictive = function(Data, Model, maxDims=6, FileName, Folder=NA){
           lambda = u.nz[,Which[ObsI]]*oneOverCV2
           y = rinvgauss(n=1000,mu=u.nz[,Which[ObsI]],lambda=lambda)
         }
-        if(Dist=="lognormalECE"){     
+        if(Dist=="lognormalECE" | Dist=="lognormalECE2"){     
           ECE = rbinom(n=nrow(u.nz)*10, size=1, prob=p.ece[,2])
           y = rlnorm(n=1000, meanlog=log(u.nz[,Which[ObsI]])*(1-ECE)+log(u.nz2[,Which[ObsI]])*ECE, sdlog=sigma*(1-ECE)+sigma2*ECE)
         }
-        if(Dist=="gammaECE"){     
+        if(Dist=="gammaECE" | Dist=="gammaECE2){     
           b = gamma.a / u.nz[,Which[ObsI]];    
           b2 = gamma.a2 / u.nz2[,Which[ObsI]];    
           ECE = rbinom(n=nrow(u.nz)*10, size=1, prob=p.ece[,2])
