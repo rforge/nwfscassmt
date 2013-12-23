@@ -89,7 +89,7 @@ PosteriorPredictive = function(Data, Model, maxDims=6, FileName, Folder=NA){
           ECE = rbinom(n=nrow(u.nz)*10, size=1, prob=p.ece[,2])
           y = rlnorm(n=1000, meanlog=log(u.nz[,Which[ObsI]])*(1-ECE)+log(u.nz2[,Which[ObsI]])*ECE, sdlog=sigma*(1-ECE)+sigma2*ECE)
         }
-        if(Dist=="gammaECE" | Dist=="gammaECE2){     
+        if(Dist=="gammaECE" | Dist=="gammaECE2"){     
           b = gamma.a / u.nz[,Which[ObsI]];    
           b2 = gamma.a2 / u.nz2[,Which[ObsI]];    
           ECE = rbinom(n=nrow(u.nz)*10, size=1, prob=p.ece[,2])
