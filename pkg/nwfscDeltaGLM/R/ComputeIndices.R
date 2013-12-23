@@ -38,13 +38,13 @@ ComputeIndices = function(Data, Model, FileName, maxDims=6, Folder=NA, Weights="
           Chains[,YearI,StratI,1] = Chains[,YearI,StratI,1] * exp(Sigma^2/2)
         }
         # LognormalECE -- Bias correction + incorporate ECE
-        if(Dist=="lognormalECE"){
+        if(Dist=="lognormalECE" | Dist=="lognormalECE2"){
           Sigma = sqrt(log(CV[,1]^2+1))        
           Sigma2 = sqrt(log(CV[,2]^2+1))        
           Chains[,YearI,StratI,1] = Chains[,YearI,StratI,1]*exp(Sigma^2/2)*p.ece[,1] + ratio*Chains[,YearI,StratI,1]*exp(Sigma2^2/2)*p.ece[,2]
         }
         # GammaECE -- incorporate ECE 
-        if(Dist=="gammaECE"){
+        if(Dist=="gammaECE" | Dist=="gammaECE2"){
           Chains[,YearI,StratI,1] = Chains[,YearI,StratI,1]*p.ece[,1] + ratio*Chains[,YearI,StratI,1]*p.ece[,2]
         }
         # Don't make mean-unbiased for unobserved vessel
