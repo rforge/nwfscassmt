@@ -1,7 +1,7 @@
 .onLoad = function(libname, pkgname){
 # Check installed packages, and install any missing
-ToInstall = setdiff( c("rjags","R2jags","runjags","superdiag","pscl","statmod","stats"), installed.packages() )
-if(length(ToInstall)>0) install.packages( ToInstall )
+#ToInstall = setdiff( c("rjags","R2jags","runjags","superdiag","pscl","statmod","stats"), installed.packages() )
+#if(length(ToInstall)>0) install.packages( ToInstall )
 
 # load default data into workspace
 require(rjags)
