@@ -145,12 +145,14 @@ fitDeltaGLM = function(modelStructure = list("StrataYear.positiveTows" = "random
   SYpos.string = ""
   if(modelStructure$StrataYear.positiveTows == "fixed") SYpos.string = paste("   for(i in 1:nSY) {\n      SYdev[i] ~ dunif(",logBounds[1],",",logBounds[2],");\n   }\n   strataYearTau[1,1] <- 0;\n","   strataYearTau[1,2] <- 0;\n   sigmaSY[1]<-0;\n   tauSY[1]<-0;\n",sep="")
   if(modelStructure$StrataYear.positiveTows == "random") SYpos.string = paste("   for(i in 1:nSY) {\n      SYdev[i] ~ dnorm(0,tauSY[1])T(",logBounds[1],",",logBounds[2],");\n   }\n   strataYearTau[1,1] <- 0;\n","   strataYearTau[1,2] <- 0;\n   sigmaSY[1]~dunif(0,100);\n   tauSY[1]<-pow(sigmaSY[1],-2);\n",sep="")
+  if(modelStructure$StrataYear.positiveTows == "random2") SYpos.string = paste("   for(i in 1:nSY) {\n      SYdev[i] ~ dnorm(0,tauSY[1])T(",logBounds[1],",",logBounds[2],");\n   }\n   strataYearTau[1,1] <- 0;\n","   strataYearTau[1,2] <- 0;\n   sigmaSY[1]<-pow(tauSY[1],-1/2);\n   tauSY[1]~dgamma(",dgammaNum,",",dgammaNum,");\n",sep="")
   if(modelStructure$StrataYear.positiveTows == "randomExpanded") SYpos.string = paste(SYexpanded, "   strataYearTau[1,1] <- 0;\n","   strataYearTau[1,2] <- 0;\n   tauSY[1]<-pow(sigmaSY[1],-2);\n",sep="")
   if(modelStructure$StrataYear.positiveTows == "zero") SYpos.string = "   for(i in 1:nSY) {\n      SYdev[i] <- 0;\n   }\n   strataYearTau[1,1] <- 0;\n   strataYearTau[1,2] <- 0;\n   sigmaSY[1]<-0;\n   tauSY[1]<-0;\n"
   
   SYzero.string = ""
   if(modelStructure$StrataYear.zeroTows == "fixed") SYzero.string = paste("   for(i in 1:nSY) {\n      pSYdev[i] ~ dunif(",logitBounds[1],",",logitBounds[2],");\n   }\n   strataYearTau[2,1] <- 0;\n","   strataYearTau[2,2] <- 0;\n","   sigmaSY[2] <- 0;\n   tauSY[2]<-0;\n",sep="")
   if(modelStructure$StrataYear.zeroTows == "random") SYzero.string = paste("   for(i in 1:nSY) {\n      pSYdev[i] ~ dnorm(0,tauSY[2])T(",logitBounds[1],",",logitBounds[2],");\n   }\n   strataYearTau[2,1] <- 0;\n","   strataYearTau[2,2] <- 0;\n   sigmaSY[2]~dunif(0,100);\n   tauSY[2]<-pow(sigmaSY[2],-2);\n",sep="")
+  if(modelStructure$StrataYear.zeroTows == "random2") SYzero.string = paste("   for(i in 1:nSY) {\n      pSYdev[i] ~ dnorm(0,tauSY[2])T(",logitBounds[1],",",logitBounds[2],");\n   }\n   strataYearTau[2,1] <- 0;\n","   strataYearTau[2,2] <- 0;\n   sigmaSY[2]<-pow(tauSY[2],-1/2);\n   tauSY[2]~dgamma(",dgammaNum,",",dgammaNum,");\n",sep="")
   if(modelStructure$StrataYear.zeroTows == "randomExpanded") SYzero.string = paste(pSYexpanded, "   strataYearTau[2,1] <- 0;\n","   strataYearTau[2,2] <- 0;\n   tauSY[2]<-pow(sigmaSY[2],-2);\n",sep="")
   if(modelStructure$StrataYear.zeroTows == "zero") SYzero.string = "   for(i in 1:nSY) {\n      pSYdev[i] <- 0;\n   }\n   strataYearTau[2,1] <- 0;\n   strataYearTau[2,2] <- 0;\n   sigmaSY[2] <- 0;\n   tauSY[2]<-0;\n"
   
