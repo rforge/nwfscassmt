@@ -1,14 +1,17 @@
 
 
-my.wd<- SourceFile <- "C:/Users/James.Thorson/Desktop/NWFSC_SVN/EricWard/nwfscDeltaGLM/"
+my.wd<- SourceFile <- "C:/Users/James.Thorson/Desktop/"
+
+install.packages("nwfscDeltaGLM", repos="http://R-Forge.R-project.org")
+library(nwfscDeltaGLM)
 
 # read in the master data file
 DataFile = SourceFile
 setwd(SourceFile)
 
 # Load data and strata
-masterDat = read.csv(paste(DataFile,"Example_Species.csv",sep=""))
-#LoadFn(paste(DataFile,"RandomSpecies.dmp",sep=""))
+data(Example_Species)
+masterDat = Example_Species
 strata.limits <- readIn(ncol=5,nlines=6)
   STRATA  NLat SLat MinDepth MaxDepth
   A      49.0 36.0  55        183
@@ -25,18 +28,16 @@ names(masterDat)[9] = species
 processData()
 
 # Define settings
-mcmc.control = list(chains=2, thin=2, burnin=2e3, iterToSave=2e3)
-Parallel = TRUE   # If having trouble, try turning off parallel
-#modelStructure1 = list("StrataYear.positiveTows"="fixed", "VesselYear.positiveTows"="random", "StrataYear.zeroTows"="fixed", "VesselYear.zeroTows"="random", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
-modelStructure1 = list("StrataYear.positiveTows"="fixed", "VesselYear.positiveTows"="fixed", "StrataYear.zeroTows"="fixed", "VesselYear.zeroTows"="fixed", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
-#modelStructure2 = list("StrataYear.positiveTows"="correlated", "VesselYear.positiveTows"="correlated", "StrataYear.zeroTows"="correlated", "VesselYear.zeroTows"="correlated", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
+mcmc.control = list(chains=2, thin=1, burnin=1e3, iterToSave=1e3)
+Parallel = FALSE   # If having trouble, try turning off parallel
+modelStructure1 = list("StrataYear.positiveTows"="fixed", "VesselYear.positiveTows"="random", "Vessel.positiveTows"="zero", "StrataYear.zeroTows"="fixed", "VesselYear.zeroTows"="random", "Vessel.zeroTows"="zero", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
 
 # Define models
 attach(Data)
 mods = list()
 mods[[1]] = fitDeltaGLM(modelStructure=modelStructure1, mcmc.control=mcmc.control,Parallel=Parallel, Species=species)
-#mods[[2]] = fitCPUEModel(modelStructure=modelStructure2, mcmc.control=mcmc.control, Parallel=Parallel, Species=species)
 
 # Process MCMC output
 # Make sure that Data is attached prior to running
+data(SA3)
 doMCMCDiags(my.wd,mods)
