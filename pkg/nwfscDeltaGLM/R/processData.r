@@ -98,17 +98,21 @@ processData = function(Truncate=0) {
 
   # If the covariates aren't in the R environment, create them
   if(!("X.bin" %in% ls(envir = .GlobalEnv))){
-    assign("X.bin",diag(2), envir = .GlobalEnv)
+    assign("X.bin",matrix(NA, ncol=0, nrow=nrow(Data)), envir = .GlobalEnv)
   }else{
     if(length(Exclude_NoStratum) > 0) X.bin = X.bin[-Exclude_NoStratum]
     if(length(Exclude_Missing) > 0) X.bin = X.bin[-Exclude_Missing]
   }
   if(!("X.pos" %in% ls(envir = .GlobalEnv))){
-    assign("X.pos",diag(2), envir = .GlobalEnv)
+    assign("X.pos",matrix(NA, ncol=0, nrow=nrow(Data)), envir = .GlobalEnv)
   }else{
     if(length(Exclude_NoStratum) > 0) X.pos = X.pos[-Exclude_NoStratum]
     if(length(Exclude_Missing) > 0) X.pos = X.pos[-Exclude_Missing]
   }
-  
+  nX.pos = ncol(X.pos)
+  nX.binomial = ncol(X.bin)
+  assign("nX.binomial",nX.binomial, envir = .GlobalEnv)
+  assign("nX.pos",nX.pos, envir = .GlobalEnv)
+          
   assign("log2pi",log(2*pi), envir = .GlobalEnv) # this is a constant for the LognormalECE2 model  
 }
