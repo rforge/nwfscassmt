@@ -1,12 +1,17 @@
 
 RunFn <-
 function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, MinusAge, PlusAge, MaxSd, MaxExpectedAge, SaveFile, EffSampleSize=0, Intern=TRUE, AdmbFile=NULL, JustWrite=FALSE){
-
   # Copy ADMB file 
   if(!is.null(AdmbFile)) file.copy(from=paste(AdmbFile,"agemat.exe",sep=""), to=paste(SaveFile,"agemat.exe",sep=""), overwrite=TRUE)
   
+  # Check for errors
+  Nreaders = ncol(Data)-1
+  for(ReaderI in 1:Nreaders){
+    if( (SigOpt[ReaderI]==5 | SigOpt[ReaderI]==6) & is.na(KnotAges[[ReaderI]][1]) ) stop("Must specify KnotAges for any reader with SigOpt 5 or 6")
+  } 
+  
   # Write DAT file
-  write(c("# Maximum number of readers",ncol(Data)-1),file=paste(SaveFile,"agemat.dat",sep=""))
+  write(c("# Maximum number of readers",Nreaders),file=paste(SaveFile,"agemat.dat",sep=""))
     write(c("# Number of data sets",NDataSets),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE)
     write(c("# Number of points per data set",nrow(Data)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE)
     write(c("# Readers per data set",ncol(Data)-1),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE)
@@ -23,16 +28,21 @@ function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, MinusAge, Plu
     write.table(rMx(SigOpt),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,row.names=FALSE,col.names=FALSE)
     write(c("# Option for effective sample size",EffSampleSize),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE)
     write(c("# Use Par File (1=Yes)",0),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE) 
+  # Write knots related to splines
+    write("\n# Number and location of knots for any splines",file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE)
+    for(ReaderI in 1:Nreaders){
+      if(SigOpt[ReaderI]==5 | SigOpt[ReaderI]==6) write.table( rMx(c(length(KnotAges[[ReaderI]]),KnotAges[[ReaderI]])), file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE) 
+    }
   # Write initial values  
     # Bias 
     write("\n# Min, Max, Init, Phase for Bias",file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE)
-    for(BiasI in 1:length(BiasOpt)){
+    for(BiasI in 1:Nreaders){
       # No bias
       if(BiasOpt[BiasI]<=0){}
       # Linear bias
       if(BiasOpt[BiasI]==1) write.table(rMx(c(0.001,3,1,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
       # Curvilinear bias = 0.5+Par1 + (Par3-Par1)/(1.0-mfexp(-Par2*(float(MaxAge)-1)))*(1.0-mfexp(-Par2*(float(Age1)-1)))
-      # Starting value must be non-zero
+      # Starting value must be non-zero        
       if(BiasOpt[BiasI]==2){
         write.table(rMx(c(0.001,10,1,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
         write.table(rMx(c(-10,1,0.01,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
@@ -41,7 +51,7 @@ function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, MinusAge, Plu
     }
     # Sigma
     write("\n# Min, Max, Init, Phase for Sigma",file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE)
-    for(SigI in 1:length(SigOpt)){
+    for(SigI in 1:Nreaders){
       # No error
       if(SigOpt[SigI]<=0){}
       # Linear CV
@@ -61,6 +71,18 @@ function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, MinusAge, Plu
         write.table(rMx(c(-10,1,0.01,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
         write.table(rMx(c(0.001,3,0.1,2)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
       }
+      # Spline with estimated derivative at beginning and end (Params 1-N: knot parameters; N+1 and N+2: derivative at beginning and end)
+      if(SigOpt[SigI]==5){
+        for(ParI in 1:(2+length(KnotAges[[SigI]]))){
+          write.table(rMx(c(-10.0,10.0,1.0,1)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
+        }
+      }
+      # Spline with derivative at beginning and end fixed at zero (Params 1-N: knot parameters)
+      if(SigOpt[SigI]==6){
+        for(ParI in 1:length(KnotAges[[SigI]])){
+          write.table(rMx(c(-10.0,10.0,1.0,1)),file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE,col.names=FALSE,row.names=FALSE)      
+        }
+      }
     }
     # Probs (i.e. age-composition probability relative to reference age)
     write("\n# Min, Max, Phase for Probs",file=paste(SaveFile,"agemat.dat",sep=""),append=TRUE)
@@ -79,9 +101,9 @@ function(Data, SigOpt, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, MinusAge, Plu
   # Run ADMB file
   if(JustWrite==FALSE){
     setwd(SaveFile)
-    #Output = shell("agemat.exe -est",intern=Intern)
-    Output = system("agemat.exe -est",intern=Intern)
-    Admb = scan(paste(SaveFile,"agemat.par",sep=""),comment.char="#",quiet=TRUE)
+    if(CallType=="shell") Output = shell("agemat.exe -est",intern=Intern)   # This may need to have the location pasted onto it depending upon file structure
+    if(CallType=="system") Output = system("agemat.exe -est",intern=Intern)
+    #Admb = scan(paste(SaveFile,"agemat.par",sep=""),comment.char="#",quiet=TRUE)
   }
 }
 
