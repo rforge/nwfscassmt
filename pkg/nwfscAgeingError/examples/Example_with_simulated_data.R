@@ -42,7 +42,7 @@ DateFile = paste(getwd(),'/',Sys.Date(),'/',sep='')
   # Row 4 -- Otoliths read twice by reader 2
   # Row 5 -- Otoliths read once by reader 1 and once by reader 2
 Nreaders = 4
-ReadsMat = cbind(NumberOfReads=rep(100,5), Reader1=c(1,1,0,0,1), Reader1_DoubleReads=c(0,1,0,0,0), Reader2=c(0,0,1,1,1), Reader2_DoubleReads=c(0,0,0,1,0))
+ReadsMat = cbind(NumberOfReads=rep(25,5), Reader1=c(1,1,0,0,1), Reader1_DoubleReads=c(0,1,0,0,0), Reader2=c(0,0,1,1,1), Reader2_DoubleReads=c(0,0,0,1,0))
   rownames(ReadsMat) = c("Reader1_Only", "Reader1_DoubleReads", "Reader2_Only", "Reader2_DoubleReads", "Reader1_&_Reader2")
 
 # Generate data
