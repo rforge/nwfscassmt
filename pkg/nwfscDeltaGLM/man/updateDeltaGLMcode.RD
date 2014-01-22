@@ -7,7 +7,7 @@ Updates nwfsc delta-GLMM code by reading from R-forge Subversion repository
 \description{
 Updates nwfsc delta-GLMM code by reading from R-forge Subversion repository}
 \usage{
-updateDeltaGLMcode(local = NULL, save = FALSE, revision = "newest",env="updateDeltaGLMcode",pos=2)
+updateDeltaGLMcode(local = NULL, save = FALSE, revision = "newest",env="nwfscDeltaGLM",pos=2)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
