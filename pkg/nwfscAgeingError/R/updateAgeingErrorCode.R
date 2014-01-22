@@ -1,5 +1,5 @@
 #test svn
-updateSurveyCode <- function (local = NULL, save = FALSE, revision = "newest",env="nwfscAgeingError",pos=2)
+updateAgeingErrorCode <- function (local = NULL, save = FALSE, revision = "newest",env="nwfscAgeingError",pos=2)
 {
     if(!is.environment(env)) {  #if env is an environment simply wirte to that. If not, create a new environment
         if(!is.character(env)) stop("'env' must be an environment or a character vector. Use default if not sure to assign objects into global workspace\n")
