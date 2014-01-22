@@ -1,5 +1,5 @@
-\name{updateAgeingErrorcode}
-\alias{updateAgeingErrorcode}
+\name{updateAgeingErrorCode}
+\alias{updateAgeingErrorCode}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Updates nwfsc Ageing Error code by reading from R-forge Subversion repository
@@ -7,7 +7,7 @@ Updates nwfsc Ageing Error code by reading from R-forge Subversion repository
 \description{
 Updates nwfsc Ageing Error code by reading from R-forge Subversion repository}
 \usage{
-updateAgeingErrorcode(local = NULL, save = FALSE, revision = "newest",env="nwfscAgeingError",pos=2)
+updateAgeingErrorCode(local = NULL, save = FALSE, revision = "newest",env="nwfscAgeingError",pos=2)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
