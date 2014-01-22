@@ -9,13 +9,12 @@
 install.packages("nwfscAgeingError", repos="http://R-Forge.R-project.org")
 library(nwfscAgeingError)
 
-# This is where the R code for functions is located
-SourceFile = "C:/Users/James.Thorson/Desktop/"
-
+# File where the Punt et al. (2008) model (pre-compiled in ADMB) resides
+SourceFile = paste(system.file(package='AgeingErrorPackage'),'/executables/',sep='')
+  
 # This is where all runs will be located
-DateFile = paste(SourceFile,Sys.Date(),"/",sep="")
+DateFile = paste(getwd(),'/',Sys.Date(),'/',sep='')
   dir.create(DateFile)
-  setwd(DateFile)
 
 #############################
 #
