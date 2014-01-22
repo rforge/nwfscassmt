@@ -1,8 +1,9 @@
 
 RunFn <-
 function(Data, SigOpt, KnotAges, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, MinusAge, PlusAge, MaxSd, MaxExpectedAge, SaveFile, EffSampleSize=0, Intern=TRUE, AdmbFile=NULL, JustWrite=FALSE, CallType="system"){
+
   # Copy ADMB file 
-  if(!is.null(AdmbFile)) file.copy(from=paste(AdmbFile,"/agemat.exe",sep=""), to=paste(SaveFile,"agemat.exe",sep=""), overwrite=TRUE)
+  if(!is.null(AdmbFile)) file.copy(from=paste(AdmbFile,"agemat.exe",sep=""), to=paste(SaveFile,"agemat.exe",sep=""), overwrite=TRUE)
   
   # Check for errors
   Nreaders = ncol(Data)-1
@@ -105,5 +106,6 @@ function(Data, SigOpt, KnotAges, BiasOpt, NDataSets, MinAge, MaxAge, RefAge, Min
     if(CallType=="system") Output = system("agemat.exe -est",intern=Intern)
     #Admb = scan(paste(SaveFile,"agemat.par",sep=""),comment.char="#",quiet=TRUE)
   }
+  #return(Output)
 }
 

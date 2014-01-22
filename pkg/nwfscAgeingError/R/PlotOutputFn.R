@@ -43,32 +43,19 @@ function(Data, MaxAge, SaveFile, PlotType="PDF"){
   TrueAge = apply(AgeProbs, MARGIN=1, FUN=function(Vec){order(Vec[-length(Vec)],decreasing=TRUE)[1]})
   
   # Plot estimated age structure
-  Temp = ifelse(Data[,-1]==-999,NA,Data[,-1])
-    Temp = tapply(ifelse(is.na(Temp),0,1), INDEX=Temp, FUN=sum)
-    Prop = rep(0,MaxAge+1)
-    Prop[as.numeric(names(Temp))+1] = Temp
-    cbind(0:MaxAge, Prop, round(AgeStruct[,2]*sum(Prop),1))
-    cbind(0:MaxAge, round(Prop/sum(Prop),3), round(AgeStruct[,2],3))
-  Plot = function(){
+  if(PlotType=="PDF") pdf(paste(SaveFile,"Estimated vs Observed Age Structure.pdf",sep=""),width=6,height=6)
+  if(PlotType=="PNG") png(paste(SaveFile,"Estimated vs Observed Age Structure.png",sep=""),width=6,height=6,units="in",res=200)
     par(mar=c(3,3,2,0),mgp=c(1.5,0.25,0),tck=-0.02,oma=c(0,0,0,0)+0.1)
     plot(x=AgeStruct[,1],y=AgeStruct[,2],type="s",lwd=2,xlab="Age",ylab="Prop",main="Estimated=Black, Observed=Red")
-    hist(ifelse(Data[,-1]==-999,NA,Data[,-1]),add=TRUE,freq=FALSE,breaks=seq(0,MaxAge,by=1),col=rgb(red=1,green=0,blue=0,alpha=0.30))
-  }
-  if(PlotType=="PDF"){
-    pdf(paste(SaveFile,"Estimated vs Observed Age Structure.pdf",sep=""),width=6,height=6)
-      Plot()
-    dev.off()
-  }
-  if(PlotType=="JPG"){
-    jpeg(paste(SaveFile,"Estimated vs Observed Age Structure.jpg",sep=""),width=6,height=6,units="in",res=200)
-      Plot()
-    dev.off()
-  }
-  
+    DataExpanded = Data[rep(1:nrow(Data),Data[,1]),-1]
+    hist(ifelse(DataExpanded==-999,NA,DataExpanded),add=TRUE,freq=FALSE,breaks=seq(0,MaxAge,by=1),col=rgb(red=1,green=0,blue=0,alpha=0.30))
+  dev.off()
+    
   # Plot true age against different age reads
   Ncol=ceiling(sqrt(Nreaders))
     Nrow=ceiling(Nreaders/Ncol)
-  Plot = function(){    
+  if(PlotType=="PDF") pdf(paste(SaveFile,"True vs Reads (by reader).pdf",sep=""),width=Ncol*3,height=Nrow*3)
+  if(PlotType=="PNG") png(paste(SaveFile,"True vs Reads (by reader).png",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
     par(mfrow=c(Nrow,Ncol),mar=c(3,3,2,0),mgp=c(1.5,0.25,0),tck=-0.02,oma=c(0,0,5,0)+0.1)
     for(ReadI in 1:Nreaders){
       Temp = cbind(TrueAge, Data[,ReadI+1]+0.5)   # Add 0.5 to match convention in Punt model that otoliths are read half way through year
@@ -81,17 +68,7 @@ function(Data, MaxAge, SaveFile, PlotType="PDF"){
       lines(x=ErrorAndBiasArray['True_Age',,ReadI],y=ErrorAndBiasArray['Expected_age',,ReadI] - 2*ErrorAndBiasArray['SD',,ReadI],type="l",col="red",lwd=1,lty="dashed")
     }
     mtext(side=3,outer=TRUE, text="Reads(dot), Sd(blue), expected_read(red solid line),\n and 95% CI for expected_read(red dotted line)",line=1)
-  }
-  if(PlotType=="PDF"){
-    pdf(paste(SaveFile,"True vs Reads (by reader).pdf",sep=""),width=Ncol*3,height=Nrow*3)
-      Plot()
-    dev.off()
-  }
-  if(PlotType=="JPG"){
-    jpeg(paste(SaveFile,"True vs Reads (by reader).jpg",sep=""),width=Ncol*3,height=Nrow*3,units="in",res=200)
-      Plot()
-    dev.off()
-  }
+  dev.off()
   
   ## AIC
   Nll = as.numeric(scan(paste(SaveFile,"agemat.par",sep=""),comment.char="%", what="character", quiet=TRUE)[11])
@@ -104,4 +81,5 @@ function(Data, MaxAge, SaveFile, PlotType="PDF"){
   Output = list(Aic=Aic, Aicc=Aicc, Bic=Bic)
   return(Output)
 }
+
 

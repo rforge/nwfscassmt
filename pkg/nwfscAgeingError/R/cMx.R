@@ -1,3 +1,3 @@
 
 cMx <-
-function(Input){as.matrix(Input)}
+function(Input){as.matrix(Input)}    

@@ -1,6 +1,6 @@
 
 StepwiseFn <-
-function(SearchMat, Data, NDataSets, MinAge, MaxAge, RefAge, MaxSd, MaxExpectedAge, SaveFile, EffSampleSize=0, Intern=TRUE, InformationCriterion="AIC"){
+function(SearchMat, Data, NDataSets, MinAge, MaxAge, RefAge, MaxSd, MaxExpectedAge, SaveFile, EffSampleSize=0, Intern=TRUE, InformationCriterion="AIC", SelectAges=TRUE){
 
   # Define variables
   Nages = MaxAge+1
@@ -50,7 +50,7 @@ function(SearchMat, Data, NDataSets, MinAge, MaxAge, RefAge, MaxSd, MaxExpectedA
         BiasOpt = ParamVecCurrent[Nreaders+1:Nreaders]
         MinusAge = ParamVecCurrent[2*Nreaders+1]
         PlusAge = ParamVecCurrent[2*Nreaders+2]
-        RunFn(SigOpt=SigOpt, BiasOpt=BiasOpt, Data=Data, NDataSets=NDataSets, MinAge=MinAge, MaxAge=MaxAge, RefAge=RefAge, MinusAge=MinusAge, PlusAge=PlusAge, MaxSd=MaxSd, MaxExpectedAge=MaxExpectedAge, SaveFile=RunFile)
+        RunFn(SigOpt=SigOpt, KnotAges=KnotAges, BiasOpt=BiasOpt, Data=Data, NDataSets=NDataSets, MinAge=MinAge, MaxAge=MaxAge, RefAge=RefAge, MinusAge=MinusAge, PlusAge=PlusAge, MaxSd=MaxSd, MaxExpectedAge=MaxExpectedAge, SaveFile=RunFile)
   
         # Compute information criteria
         Df = as.numeric(scan(paste(RunFile,"agemat.par",sep=""),comment.char="%", what="character", quiet=TRUE)[6])
@@ -83,14 +83,21 @@ function(SearchMat, Data, NDataSets, MinAge, MaxAge, RefAge, MaxSd, MaxExpectedA
   
     # Change boundaries for MinusAge parameter
     CurrentMinusAge = ParamVecOpt[length(ParamVecOpt)-1]
-    SearchMat[length(ParamVecOpt)-1,1:7] = c(CurrentMinusAge,CurrentMinusAge-10,CurrentMinusAge-4,CurrentMinusAge-1,CurrentMinusAge+1,CurrentMinusAge+4,CurrentMinusAge+10)
-    SearchMat[length(ParamVecOpt)-1,1:7] = ifelse(SearchMat[length(ParamVecOpt)-1,1:7]<MinAge,NA,SearchMat[length(ParamVecOpt)-1,1:7])
+    if(SelectAges==TRUE){
+      SearchMat[length(ParamVecOpt)-1,1:7] = c(CurrentMinusAge,CurrentMinusAge-10,CurrentMinusAge-4,CurrentMinusAge-1,CurrentMinusAge+1,CurrentMinusAge+4,CurrentMinusAge+10)
+      SearchMat[length(ParamVecOpt)-1,1:7] = ifelse(SearchMat[length(ParamVecOpt)-1,1:7]<MinAge,NA,SearchMat[length(ParamVecOpt)-1,1:7])
+    }else{
+      SearchMat[length(ParamVecOpt)-1,1:7] = c( CurrentMinusAge, rep(NA,6) )
+    }
   
     # Change boundaries for PlusAge parameter
     CurrentPlusAge = ParamVecOpt[length(ParamVecOpt)]
-    SearchMat[length(ParamVecOpt),1:7] = c(CurrentPlusAge,CurrentPlusAge-10,CurrentPlusAge-4,CurrentPlusAge-1,CurrentPlusAge+1,CurrentPlusAge+4,CurrentPlusAge+10)
-    SearchMat[length(ParamVecOpt),1:7] = ifelse(SearchMat[length(ParamVecOpt),1:7]>MaxAge,NA,SearchMat[length(ParamVecOpt),1:7])
-  
+    if(SelectAges==TRUE){
+      SearchMat[length(ParamVecOpt),1:7] = c(CurrentPlusAge,CurrentPlusAge-10,CurrentPlusAge-4,CurrentPlusAge-1,CurrentPlusAge+1,CurrentPlusAge+4,CurrentPlusAge+10)
+      SearchMat[length(ParamVecOpt),1:7] = ifelse(SearchMat[length(ParamVecOpt),1:7]>MaxAge,NA,SearchMat[length(ParamVecOpt),1:7])
+    }else{
+      SearchMat[length(ParamVecOpt),1:7] = c( CurrentPlusAge, rep(NA,6) )    
+    }
     # Save image for each while loop
     writeLines(Rep[[Max]], con=paste(SaveFile,"agemat.rep",sep=""))
     PlotOutputFn(Data=Data, MaxAge=MaxAge, SaveFile=SaveFile, PlotType="JPG")
