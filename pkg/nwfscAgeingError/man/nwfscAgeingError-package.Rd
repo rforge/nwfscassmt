@@ -124,93 +124,95 @@ Punt, A.E., Smith, D.C., KrusicGolub, K., and Robertson, S. 2008. Quantifying ag
 \seealso{
 }
 \examples{
-# File where the Punt et al. (2008) model (pre-compiled in ADMB) resides
-SourceFile = paste(system.file(package='AgeingErrorPackage'),'/executables/',sep='')
 
-# This is where all runs will be located
-DateFile = paste(getwd(),'/',Sys.Date(),'/',sep='')
-  dir.create(DateFile)
-
-#############################
-#
-# Generate and run with an artificial dataset
-#
-# SimulatorFn() generates the data and has the following settings
-#   Nreaders is the number of readers
-#   ReadsMat is a matrix where each row specifies how many reads (in the first column) have a particular pattern of double reads (in the second through Nreaders+1 columns)
-#   SelexForm is the selectivity-at-age form (logistic selex-at-age is the only one that is implemented)
-#   SelexParams are standard to the logistic equation
-#   BiasParams b in the following equation:   E[AgeRead] = b*TrueAge
-#   ErrorParams are CV in the following equation:  Var[AgeRead] = (CV*TrueAge)^2
-#   RecCV is the is the CV in recruitment (and recruitment is assumed stationary over time)
-#   RecAR1 is first-order autoregressive coefficient in recruitment
-#   Amax is the maximum allowable age
-#
-#############################
-
-##### Parameters for generating data
-# This represents 2 unique readers
-  # Row 1 -- Otoliths read only once by reader
-  # Row 2 -- Otoliths read twice by reader 1
-  # Row 2 -- Otoliths read only once by reader 2
-  # Row 4 -- Otoliths read twice by reader 2
-  # Row 5 -- Otoliths read once by reader 1 and once by reader 2
-Nreaders = 4
-ReadsMat = cbind(NumberOfReads=rep(100,5), Reader1=c(1,1,0,0,1), Reader1_DoubleReads=c(0,1,0,0,0), Reader2=c(0,0,1,1,1), Reader2_DoubleReads=c(0,0,0,1,0))
-  rownames(ReadsMat) = c("Reader1_Only", "Reader1_DoubleReads", "Reader2_Only", "Reader2_DoubleReads", "Reader1_&_Reader2")
-
-# Generate data
-AgeReads = SimulatorFn(Nreaders=Nreaders, M=0.2, SelexForm="Logistic", SelexParams=c(5,0.2), BiasParams=c(1,1,1.1,1.1), ErrorParams=c(0.2,0.2,0.2,0.2), ReadsMat=ReadsMat, RecCv=0.6, RecAr1=0.8, Amax=100)
-  write.csv(AgeReads, file=paste(DateFile,"Simulated_data_example.csv",sep=""))
-
-##### Format data
-Nreaders = ncol(AgeReads)
-  AgeReads = ifelse(is.na(AgeReads),-999,AgeReads)  # Change NA to -999 (which the Punt software considers missing data)
-# Potentially eliminate rows that are only read once
-  # These rows have no information about reading error, but are potentially informative about latent age-structure
-  # It is unknown whether eliminating these rows degrades estimation of error and bias, and is currently recommended to speed up computation
-#KeepRow = ifelse(rowSums(ifelse(AgeReads==-999,0,1),na.rm=TRUE)<=1,FALSE,TRUE)
-#AgeReads = AgeReads[KeepRow,]
-# Combine duplicate rows
-AgeReads2 = rMx(c(1, AgeReads[1,])) # AgeReads2 is the correctly formatted data object
-for(RowI in 2:nrow(AgeReads)){
-  DupRow = NA
-  for(PreviousRowJ in 1:nrow(AgeReads2)){
-    if(all(AgeReads[RowI,1:Nreaders]==AgeReads2[PreviousRowJ,1:Nreaders+1])) DupRow = PreviousRowJ
+if(FALSE){
+  # File where the Punt et al. (2008) model (pre-compiled in ADMB) resides
+  SourceFile = paste(system.file(package='AgeingErrorPackage'),'/executables/',sep='')
+  
+  # This is where all runs will be located
+  DateFile = paste(getwd(),'/',Sys.Date(),'/',sep='')
+    dir.create(DateFile)
+  
+  #############################
+  #
+  # Generate and run with an artificial dataset
+  #
+  # SimulatorFn() generates the data and has the following settings
+  #   Nreaders is the number of readers
+  #   ReadsMat is a matrix where each row specifies how many reads (in the first column) have a particular pattern of double reads (in the second through Nreaders+1 columns)
+  #   SelexForm is the selectivity-at-age form (logistic selex-at-age is the only one that is implemented)
+  #   SelexParams are standard to the logistic equation
+  #   BiasParams b in the following equation:   E[AgeRead] = b*TrueAge
+  #   ErrorParams are CV in the following equation:  Var[AgeRead] = (CV*TrueAge)^2
+  #   RecCV is the is the CV in recruitment (and recruitment is assumed stationary over time)
+  #   RecAR1 is first-order autoregressive coefficient in recruitment
+  #   Amax is the maximum allowable age
+  #
+  #############################
+  
+  ##### Parameters for generating data
+  # This represents 2 unique readers
+    # Row 1 -- Otoliths read only once by reader
+    # Row 2 -- Otoliths read twice by reader 1
+    # Row 2 -- Otoliths read only once by reader 2
+    # Row 4 -- Otoliths read twice by reader 2
+    # Row 5 -- Otoliths read once by reader 1 and once by reader 2
+  Nreaders = 4
+  ReadsMat = cbind(NumberOfReads=rep(100,5), Reader1=c(1,1,0,0,1), Reader1_DoubleReads=c(0,1,0,0,0), Reader2=c(0,0,1,1,1), Reader2_DoubleReads=c(0,0,0,1,0))
+    rownames(ReadsMat) = c("Reader1_Only", "Reader1_DoubleReads", "Reader2_Only", "Reader2_DoubleReads", "Reader1_&_Reader2")
+  
+  # Generate data
+  AgeReads = SimulatorFn(Nreaders=Nreaders, M=0.2, SelexForm="Logistic", SelexParams=c(5,0.2), BiasParams=c(1,1,1.1,1.1), ErrorParams=c(0.2,0.2,0.2,0.2), ReadsMat=ReadsMat, RecCv=0.6, RecAr1=0.8, Amax=100)
+    write.csv(AgeReads, file=paste(DateFile,"Simulated_data_example.csv",sep=""))
+  
+  ##### Format data
+  Nreaders = ncol(AgeReads)
+    AgeReads = ifelse(is.na(AgeReads),-999,AgeReads)  # Change NA to -999 (which the Punt software considers missing data)
+  # Potentially eliminate rows that are only read once
+    # These rows have no information about reading error, but are potentially informative about latent age-structure
+    # It is unknown whether eliminating these rows degrades estimation of error and bias, and is currently recommended to speed up computation
+  #KeepRow = ifelse(rowSums(ifelse(AgeReads==-999,0,1),na.rm=TRUE)<=1,FALSE,TRUE)
+  #AgeReads = AgeReads[KeepRow,]
+  # Combine duplicate rows
+  AgeReads2 = rMx(c(1, AgeReads[1,])) # AgeReads2 is the correctly formatted data object
+  for(RowI in 2:nrow(AgeReads)){
+    DupRow = NA
+    for(PreviousRowJ in 1:nrow(AgeReads2)){
+      if(all(AgeReads[RowI,1:Nreaders]==AgeReads2[PreviousRowJ,1:Nreaders+1])) DupRow = PreviousRowJ
+    }
+    if(is.na(DupRow)) AgeReads2 = rbind(AgeReads2, c(1, AgeReads[RowI,])) # Add new row to AgeReads2
+    if(!is.na(DupRow)) AgeReads2[DupRow,1] = AgeReads2[DupRow,1] + 1 # Increment number of samples for the previous duplicate
   }
-  if(is.na(DupRow)) AgeReads2 = rbind(AgeReads2, c(1, AgeReads[RowI,])) # Add new row to AgeReads2
-  if(!is.na(DupRow)) AgeReads2[DupRow,1] = AgeReads2[DupRow,1] + 1 # Increment number of samples for the previous duplicate
+  
+  ######## Determine settings for ADMB
+  
+  # Generate vector with settings for Bias
+  # One entry for each reader
+  # -X = Mirror the parameters for reader X
+  # 0 = Unbiased (at least 1 reader has to be)
+  # 1 = Linear bias
+  # 2 = Curvilinear bias (3 param)
+  BiasOpt = c(0,-1,2,-3)
+  
+  # Generate vector with settings for SD
+  # One entry for each reader
+  # -X = Mirror the parameters for reader X
+  # 0 = No error
+  # 1 = Constant coefficient of variation
+  # 2 = Curvilinear standard deviation (3 param)
+  # 3 = Curvilinear coefficient of variation (3 param)
+  SigOpt = c(3,-1,3,-3)
+  
+  # Define minimum and maximum ages for integral across unobserved ages
+  MinAge = 1
+  MaxAge = ceiling(max(AgeReads2)/10)*10
+  
+  # Run the model
+    #Data=AgeReads2; SigOpt=SigOpt; BiasOpt=BiasOpt; NDataSets=1; MinAge=MinAge; MaxAge=MaxAge; RefAge=10; MinusAge=1; PlusAge=30; MaxSd=40; MaxExpectedAge=MaxAge+10; SaveFile=DateFile; AdmbFile=SourceFile; EffSampleSize=0; Intern=TRUE
+  RunFn(Data=AgeReads2, SigOpt=SigOpt, BiasOpt=BiasOpt, NDataSets=1, MinAge=MinAge, MaxAge=MaxAge, RefAge=10, MinusAge=1, PlusAge=30, SaveFile=DateFile, AdmbFile=SourceFile, EffSampleSize=0, Intern=FALSE, JustWrite=FALSE)
+  
+  # Plot output
+    #Data=AgeReads2; MaxAge=MaxAge; SaveFile=DateFile; PlotType="PDF"
+  PlotOutputFn(Data=AgeReads2, MaxAge=MaxAge, SaveFile=DateFile, PlotType="PDF")
 }
-
-######## Determine settings for ADMB
-
-# Generate vector with settings for Bias
-# One entry for each reader
-# -X = Mirror the parameters for reader X
-# 0 = Unbiased (at least 1 reader has to be)
-# 1 = Linear bias
-# 2 = Curvilinear bias (3 param)
-BiasOpt = c(0,-1,2,-3)
-
-# Generate vector with settings for SD
-# One entry for each reader
-# -X = Mirror the parameters for reader X
-# 0 = No error
-# 1 = Constant coefficient of variation
-# 2 = Curvilinear standard deviation (3 param)
-# 3 = Curvilinear coefficient of variation (3 param)
-SigOpt = c(3,-1,3,-3)
-
-# Define minimum and maximum ages for integral across unobserved ages
-MinAge = 1
-MaxAge = ceiling(max(AgeReads2)/10)*10
-
-# Run the model
-  #Data=AgeReads2; SigOpt=SigOpt; BiasOpt=BiasOpt; NDataSets=1; MinAge=MinAge; MaxAge=MaxAge; RefAge=10; MinusAge=1; PlusAge=30; MaxSd=40; MaxExpectedAge=MaxAge+10; SaveFile=DateFile; AdmbFile=SourceFile; EffSampleSize=0; Intern=TRUE
-RunFn(Data=AgeReads2, SigOpt=SigOpt, BiasOpt=BiasOpt, NDataSets=1, MinAge=MinAge, MaxAge=MaxAge, RefAge=10, MinusAge=1, PlusAge=30, SaveFile=DateFile, AdmbFile=SourceFile, EffSampleSize=0, Intern=FALSE, JustWrite=FALSE)
-
-# Plot output
-  #Data=AgeReads2; MaxAge=MaxAge; SaveFile=DateFile; PlotType="PDF"
-PlotOutputFn(Data=AgeReads2, MaxAge=MaxAge, SaveFile=DateFile, PlotType="PDF")
-
 }
