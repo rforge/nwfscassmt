@@ -22,7 +22,7 @@ ComputeIndices = function(Data, Model, FileName, maxDims=6, Folder=NA, Weights="
   for(YearI in 1:nrow(PosMean)){
     for(StratI in 1:ncol(PosMean)){
       # Derived indicators
-      StrataYearI = which(levels(strataYear)==paste(toupper(levels(strata)[StratI]),":",levels(year)[YearI],sep=""))
+      StrataYearI = which(levels(strataYear)==paste(levels(strata)[StratI],":",levels(year)[YearI],sep=""))
       AreaI = which(StrataTable[,'strataYear']==paste(levels(strata)[StratI],":",levels(year)[YearI],sep=""))
       Which = which(strata==levels(strata)[StratI] & year==levels(year)[YearI])
       # Year, strata, and area

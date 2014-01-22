@@ -2,6 +2,12 @@
 ####### This block of code is related to processing output
 doMCMCDiags = function(directory, mods, StrataWeights="StrataAreas", McmcDiagnostics=FALSE) {
 
+  # Load data
+  if( !("Data" %in% search()) ){
+    attach(Data)
+    on.exit( detach(Data) )
+  }
+
   # Identify strata and year for StratYear values
   StrataTable = data.frame( 'strataYear'=levels(strataYear), 'strata'=sapply(levels(strataYear),FUN=function(Char){strsplit(Char,":")[[1]][1]}), 'year'=sapply(levels(strataYear),FUN=function(Char){strsplit(Char,":")[[1]][2]}), 'Area_Hectares'=rep(NA,nlevels(strataYear)))
   for(i in 1:nrow(StrataTable)){

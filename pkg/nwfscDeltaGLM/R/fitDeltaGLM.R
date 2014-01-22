@@ -29,6 +29,13 @@
 fitDeltaGLM = function(modelStructure = list("StrataYear.positiveTows" = "random","VesselYear.positiveTows" = "random","StrataYear.zeroTows" ="random","VesselYear.zeroTows" = "random", "Vessel.positiveTows"="zero","Vessel.zeroTows"="zero", "Catchability.positiveTows" = "one", "Catchability.zeroTows" = "zero", "year.deviations" = "uncorrelated","strata.deviations" = "uncorrelated"),covariates=list(positive=FALSE,binomial=FALSE),likelihood = "gamma", model.name = "deltaGLM.txt", fit.model=TRUE, write.model=TRUE, mcmc.control = list(chains = 5, thin = 1, burn = 5000, iterToSave = 2000),Parallel=TRUE, Species = "NULL",logitBounds = c(-20,20),logBounds = c(-20,20), prior.scale = rep(25,6), dgammaNum=0.001) {
   load.module("glm") # JAGS 
   runif(1)
+
+  # Load data
+  if( !("Data" %in% search()) ){
+    attach(Data)
+    on.exit( detach(Data) )
+  }
+
   if(modelStructure$Catchability.positiveTows%in%c("linear","quadratic") | modelStructure$Catchability.zeroTows%in%c("one","linear","quadratic")){
     print("Warning: index will not have comparable scale to a design-based (raw) index unless catchability.positiveTows equals 'one'  catchability.zeroTows equals 'zero'") 
   }
