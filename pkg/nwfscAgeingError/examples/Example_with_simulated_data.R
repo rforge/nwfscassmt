@@ -6,16 +6,14 @@
 #
 #################
 
+install.packages("nwfscAgeingError", repos="http://R-Forge.R-project.org")
+library(nwfscAgeingError)
+
 # This is where the R code for functions is located
-#SourceFile = "C:/Users/James.Thorson/Desktop/NWFSC_SVN/JimThor/AgeingError/"
-SourceFile = "C:/Users/James.Thorson/Desktop/UW Hideaway/Collaborations/Spline ageing error/"
-  source(paste(SourceFile,"Fn_Run_and_plot_model.r",sep=""))
-  source(paste(SourceFile,"Fn_Simulate_data.r",sep=""))
-  source(paste(SourceFile,"Fn_stepwise_model_builder.r",sep=""))
+SourceFile = "C:/Users/James.Thorson/Desktop/"
 
 # This is where all runs will be located
-#DateFile = paste(SourceFile,Sys.Date(),"/",sep="")
-  DateFile = paste(SourceFile,"2013-09-06B/",sep="")
+DateFile = paste(SourceFile,Sys.Date(),"/",sep="")
   dir.create(DateFile)
   setwd(DateFile)
 
