@@ -2,12 +2,9 @@
 
 #install.packages("nwfscDeltaGLM", repos="http://R-Forge.R-project.org")
 library(nwfscDeltaGLM)
-load.module("glm")
 
 # File structure
-SourceFile <- "C:/Users/James.Thorson/Desktop/UW Hideaway/Collaborations/vessel and vessel-year/Sanity checks/Simulation_test/"
-DataFile = SourceFile
-my.wd = SourceFile
+my.wd <- "C:/Users/James.Thorson/Desktop/UW Hideaway/Collaborations/vessel and vessel-year/Sanity checks/Simulation_test/"
 setwd(my.wd)
 
 # Simulate data
@@ -43,8 +40,6 @@ mcmc.control = list(chains=2, thin=1e0, burnin=1e3, iterToSave=1e3)
 Parallel = FALSE   # If having trouble, try turning off parallel
 
 # Define models
-attach(Data)
-#attach(List)
 mods = list()
 #modelStructure1 = list("StrataYear.positiveTows"="zero", "VesselYear.positiveTows"="random", "StrataYear.zeroTows"="zero", "VesselYear.zeroTows"="random", "Vessel.positiveTows"="zero", "Vessel.zeroTows"="zero", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
 modelStructure1 = list("StrataYear.positiveTows"="zero", "VesselYear.positiveTows"="random2", "StrataYear.zeroTows"="zero", "VesselYear.zeroTows"="random2", "Vessel.positiveTows"="zero", "Vessel.zeroTows"="zero", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
