@@ -30,12 +30,6 @@ fitDeltaGLM = function(Data, modelStructure = list("StrataYear.positiveTows" = "
   load.module("glm") # JAGS 
   runif(1)
 
-  # Load data
-  if( !("Data" %in% search()) ){
-    attach(Data)
-    on.exit( detach(Data) )
-  }
-
   if(modelStructure$Catchability.positiveTows%in%c("linear","quadratic") | modelStructure$Catchability.zeroTows%in%c("one","linear","quadratic")){
     print("Warning: index will not have comparable scale to a design-based (raw) index unless catchability.positiveTows equals 'one'  catchability.zeroTows equals 'zero'") 
   }
