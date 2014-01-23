@@ -9,7 +9,7 @@ Sim_Simple = function(MeanEncounter, Nyears=10, Nstrata=15, Nvessels=4, Obsperye
   betaVY = array( rnorm(Nvessels*Nyears*2,sd=sigmaVY), dim=c(2,Nvessels,Nyears))
 
   # Simulate data
-  DF = NULL
+  DF = data.frame()
   for(YearI in 1:Nyears){
     Data = cbind( "YEAR"=rep(YearI,Obsperyear), "STRATUM"=sample(1:Nstrata,replace=TRUE,size=Obsperyear), "VESSEL"=sample(1:Nvessels,replace=TRUE,size=Obsperyear), "AREA_SWEPT_HA"=rep(1,Obsperyear) )
     Data = cbind( Data, "SPECIES_WT_KG"=rbinom( n=Obsperyear, size=1, prob=plogis(qlogis(MeanEncounter) + betaY[1,][Data[,'YEAR']] + betaS[1,][Data[,'STRATUM']] + betaSY[1,,][Data[,c('STRATUM','YEAR')]] + betaV[1,][Data[,'VESSEL']] + betaVY[1,,][Data[,c('VESSEL','YEAR')]]) ) )
@@ -18,6 +18,7 @@ Sim_Simple = function(MeanEncounter, Nyears=10, Nstrata=15, Nvessels=4, Obsperye
     Data[,'SPECIES_WT_KG'] = ifelse( Data[,'SPECIES_WT_KG']==1, rgamma(Obsperyear, shape=alpha, rate=beta), 0 )
     DF = rbind(DF, Data)
   }
+  DF[,'YEAR'] = DF[,'YEAR'] + 2000
   # Re-organize stratum details
   DF = as.data.frame(DF)
   names(DF) = colnames(Data)
