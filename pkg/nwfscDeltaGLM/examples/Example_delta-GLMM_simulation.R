@@ -4,7 +4,7 @@
 library(nwfscDeltaGLM)
 
 # File structure
-my.wd <- "C:/Users/James.Thorson/Desktop/UW Hideaway/Collaborations/vessel and vessel-year/Sanity checks/Simulation_test/"
+my.wd <- "C:/Users/James.Thorson/Desktop/"
 setwd(my.wd)
 
 # Simulate data
@@ -41,10 +41,8 @@ Parallel = FALSE   # If having trouble, try turning off parallel
 
 # Define models
 mods = list()
-#modelStructure1 = list("StrataYear.positiveTows"="zero", "VesselYear.positiveTows"="random", "StrataYear.zeroTows"="zero", "VesselYear.zeroTows"="random", "Vessel.positiveTows"="zero", "Vessel.zeroTows"="zero", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
 modelStructure1 = list("StrataYear.positiveTows"="zero", "VesselYear.positiveTows"="random2", "StrataYear.zeroTows"="zero", "VesselYear.zeroTows"="random2", "Vessel.positiveTows"="zero", "Vessel.zeroTows"="zero", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
   mods[[1]] = fitDeltaGLM(likelihood = "gamma", modelStructure=modelStructure1, mcmc.control=mcmc.control, Parallel=Parallel, Species=species)
-#modelStructure2 = list("StrataYear.positiveTows"="zero", "VesselYear.positiveTows"="zero", "StrataYear.zeroTows"="zero", "VesselYear.zeroTows"="zero", "Vessel.positiveTows"="random", "Vessel.zeroTows"="random", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
 modelStructure2 = list("StrataYear.positiveTows"="zero", "VesselYear.positiveTows"="zero", "StrataYear.zeroTows"="zero", "VesselYear.zeroTows"="zero", "Vessel.positiveTows"="random2", "Vessel.zeroTows"="random2", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
   mods[[2]] = fitDeltaGLM(likelihood = "gamma", modelStructure=modelStructure2, mcmc.control=mcmc.control, Parallel=Parallel, Species=species)
 save(mods, file=paste(my.wd,"mods.RData",sep=""))
