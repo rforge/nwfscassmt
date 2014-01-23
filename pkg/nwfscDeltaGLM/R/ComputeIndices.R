@@ -120,10 +120,6 @@ ComputeIndices = function(Data, Model, FileName, maxDims=6, Folder=NA, Weights="
   Results1 = data.frame(Year=as.vector(Year), Strata=as.vector(Strata), Raw=as.vector(RawWeighted), RawCV=as.vector(RawCV), IndexMedian=as.vector(IndexMedianWeighted), IndexMean=as.vector(IndexMeanWeighted), CvMedian=as.vector(CvMedian), SdLog=as.vector(SdLog), Area=as.vector(Area), PosMedian=as.vector(PosMedian), PresMedian=as.vector(PresMedian), PosMean=as.vector(PosMean), PresMean=as.vector(PresMean), RawPos=as.vector(RawPos), RawPres=as.vector(RawPres), RawSD=ifelse(as.vector(RawVarWeighted)==0,NA,as.vector(sqrt(RawVarWeighted))))
   Results2 = data.frame(Year=Year[,1], Raw=rowSums(RawWeighted,na.rm=TRUE), RawCV=sqrt(rowSums(RawVarWeighted,na.rm=TRUE))/rowSums(RawWeighted,na.rm=TRUE), IndexMedian=rowSums(IndexMedianWeighted,na.rm=TRUE), IndexMean=rowSums(IndexMeanWeighted,na.rm=TRUE), CvMedian=CvMedianYear, SdLog=SdLogYear)
   
-  # Detach stuff -- listed by search()
-  #detach(Data)
-  detach(Model$BUGSoutput$sims.list)
-  
   # Write and print output
   write.csv(Results1,file=paste(Folder,"/",FileName,"ResultsByYearAndStrata.csv",sep=""))
   write.csv(Results2,file=paste(Folder,"/",FileName,"ResultsByYear.csv",sep=""))
