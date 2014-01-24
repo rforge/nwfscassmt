@@ -102,14 +102,14 @@ PosteriorPredictive = function(Data, Model, maxDims=6, FileName, Folder=NA){
             ll.nz[,Which[ObsI]] = dinvgauss( Data[nonZeros[Which[ObsI]],'HAUL_WT_KG'],mu=u.nz[,Which[ObsI]],lambda=lambda,log=TRUE)
           }
           if(Dist=="lognormalECE" | Dist=="lognormalECE2"){     
-            ECE = rbinom(n=nrow(u.nz)*10, size=1, prob=p.ece[,2])
+            ECE = rbinom(n=nrow(u.nz), size=1, prob=p.ece[,2])
             y = rlnorm(n=1000, meanlog=log(u.nz[,Which[ObsI]])*(1-ECE)+log(u.nz2[,Which[ObsI]])*ECE, sdlog=sigma*(1-ECE)+sigma2*ECE)
             ll.nz[,Which[ObsI]] = dlnorm( Data[nonZeros[Which[ObsI]],'HAUL_WT_KG'], meanlog=log(u.nz[,Which[ObsI]])*(1-ECE)+log(u.nz2[,Which[ObsI]])*ECE, sdlog=sigma*(1-ECE)+sigma2*ECE,log=TRUE)
           }
           if(Dist=="gammaECE" | Dist=="gammaECE2"){     
             b = gamma.a / u.nz[,Which[ObsI]];    
             b2 = gamma.a2 / u.nz2[,Which[ObsI]];    
-            ECE = rbinom(n=nrow(u.nz)*10, size=1, prob=p.ece[,2])
+            ECE = rbinom(n=nrow(u.nz), size=1, prob=p.ece[,2])
             y = rgamma(n=1000, shape=gamma.a*(1-ECE)+gamma.a2*ECE, rate=b*(1-ECE)+b2*ECE)
             ll.nz[,Which[ObsI]] = dgamma( Data[nonZeros[Which[ObsI]],'HAUL_WT_KG'], shape=gamma.a*(1-ECE)+gamma.a2*ECE, rate=b*(1-ECE)+b2*ECE,log=TRUE)
           }
@@ -134,8 +134,12 @@ PosteriorPredictive = function(Data, Model, maxDims=6, FileName, Folder=NA){
   abline(a=0,b=1)
   dev.off()
   
-  # Calculate WAIC
-  p_WAIC = 2*sum(log(colMeans(exp(ll.nz))) - colMeans( ll.nz )) + 2*sum(log(colMeans(exp(ll.z))) - colMeans( ll.z ))
-  WAIC = -2*sum(log(colMeans(exp(ll.nz)))) + 2*p_WAIC
-  capture.output( paste("WAIC=",round(WAIC,2)," p_WAIC=",round(p_WAIC,2),sep=""), file=paste(Folder,"/",FileName,"WAIC.txt",sep=""))
+  # Calculate WAIC (
+  p_WAIC_1 = 2*sum(log(colMeans(exp(ll.nz))) - colMeans( ll.nz )) + 2*sum(log(colMeans(exp(ll.z))) - colMeans( ll.z ))
+  p_WAIC_2 = sum( apply(ll.nz, MARGIN=2, FUN=var) ) + sum( apply(ll.z, MARGIN=2, FUN=var) )
+  llpd = sum(log(colMeans(exp(ll.nz)))) + sum(log(colMeans(exp(ll.z))))  # Eq. 5
+  WAIC_1 = -2*llpd + 2*p_WAIC_1
+  WAIC_2 = -2*llpd + 2*p_WAIC_2
+  WAIC = matrix(c(llpd,llpd,p_WAIC_1,p_WAIC_2,WAIC_1,WAIC_2),byrow=FALSE,nrow=2,ncol=3, dimnames=list(c("Formula1","Formula2"),c("log_pointwise_predictive_density","effective parameters","WAIC")))
+  write.csv( WAIC, file=paste(Folder,"/",FileName,"WAIC.csv",sep=""))
 }
