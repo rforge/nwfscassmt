@@ -1,6 +1,6 @@
 
 
-#install.packages("nwfscDeltaGLM", repos="http://R-Forge.R-project.org")
+install.packages("nwfscDeltaGLM", repos="http://R-Forge.R-project.org")
 library(nwfscDeltaGLM)
 
 # File structure
@@ -43,7 +43,7 @@ Parallel = FALSE   # If having trouble, try turning off parallel
 mods = list()
 modelStructure1 = list("StrataYear.positiveTows"="zero", "VesselYear.positiveTows"="random2", "StrataYear.zeroTows"="zero", "VesselYear.zeroTows"="random2", "Vessel.positiveTows"="zero", "Vessel.zeroTows"="zero", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
   mods[[1]] = fitDeltaGLM(likelihood = "gamma", modelStructure=modelStructure1, mcmc.control=mcmc.control, Parallel=Parallel, Species=species)
-modelStructure2 = list("StrataYear.positiveTows"="zero", "VesselYear.positiveTows"="zero", "StrataYear.zeroTows"="zero", "VesselYear.zeroTows"="zero", "Vessel.positiveTows"="random2", "Vessel.zeroTows"="random2", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
+modelStructure2 = list("StrataYear.positiveTows"="zero", "VesselYear.positiveTows"="zero", "Vessel.positiveTows"="random2", "StrataYear.zeroTows"="zero", "VesselYear.zeroTows"="zero", "Vessel.zeroTows"="random2", "Catchability.positiveTows"="one", "Catchability.zeroTows"="zero", "year.deviations"="fixed", "strata.deviations"="fixed")
   mods[[2]] = fitDeltaGLM(likelihood = "gamma", modelStructure=modelStructure2, mcmc.control=mcmc.control, Parallel=Parallel, Species=species)
 save(mods, file=paste(my.wd,"mods.RData",sep=""))
 
