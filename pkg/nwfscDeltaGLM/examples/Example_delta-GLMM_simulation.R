@@ -9,7 +9,8 @@ setwd(my.wd)
 
 # Simulate data
   # MeanEncounter=0.5; Nyears=10; Nstrata=15; Nvessels=4; Obsperyear=175; sigmaV=rep(1,2); sigmaVY=rep(1,2); sigmaS=rep(1,2); sigmaY=rep(1,2); sigmaSY=rep(1,2); sigmaResid=1
-masterDat = Sim_Simple( MeanEncounter=0.5, Nyears=10, Nstrata=15, Nvessels=4, Obsperyear=175, sigmaV=rep(0,2), sigmaVY=rep(1,2), sigmaS=rep(1,2), sigmaY=rep(1,2), sigmaSY=rep(1,2), sigmaResid=1 )
+Sim_List = Sim_Simple( MeanEncounter=0.5, Nyears=10, Nstrata=15, Nvessels=4, Obsperyear=175, sigmaV=rep(0,2), sigmaVY=rep(1,2), sigmaS=rep(1,2), sigmaY=rep(1,2), sigmaSY=rep(1,2), sigmaResid=1 )
+masterDat = Sim_List[["DF"]]
 strata.limits <- readIn(ncol=5,nlines=16)
   STRATA  NLat SLat MinDepth MaxDepth
   A      1.5 0.5  0       100

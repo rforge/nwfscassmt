@@ -24,5 +24,6 @@ Sim_Simple = function(MeanEncounter, Nyears=10, Nstrata=15, Nvessels=4, Obsperye
   names(DF) = colnames(Data)
   DF = data.frame(DF, "BEST_DEPTH_M"=rep(1,Obsperyear), "BEST_LAT_DD"=DF[,'STRATUM'] )
   
-  return(DF)
+  Return = list( "DF"=DF, "betaY"=betaY, "betaS"=betaS, "betaSY"=betaSY, "betaV"=betaV, "betaVY"=betaVY )
+  return(Return)
 }
