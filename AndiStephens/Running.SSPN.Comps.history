@@ -1,0 +1,28 @@
+setwd("~/2013_analyses/pacfin")
+rawdata = read.csv("bds.SSPN.csv", as.is=T)
+source("PacFIN_Utilities.R")
+Pdata = cleanPacFIN(rawdata, USINPFC=T)
+Pdata = getState(Pdata)
+Pdata = getSeason(Pdata)
+Pdata = getExpansion_1(Pdata, fa=4.68e-6, fb=3.27, ma=4.89e-6, mb=3.25, ua=4.77e-6, ub=3.26)
+Catch = read.csv("SSPN_PacFIN_For_Expansion.csv", as.is=T)
+OTHER = c("FPT","GLN","HKL","LGL")
+Pdata$state[Pdata$state != "CA"] = "WA_OR"
+head(Catch)
+Pdata$Fishery = "TRAWL"
+Pdata$Fishery[Pdata$GRID %in% OTHER] = "OTHER"
+Pdata = getExpansion_2(Pdata, Catch, target="Fishery")
+Catch$WA_OR = Catch$WA + Catch$OR
+Pdata = getExpansion_2(Pdata, Catch, target="Fishery")
+Pdata$Final_Sample_Size = Pdata$FREQ
+Pcomps = getComps(Pdata, strat=c("Fishery","state"),Comps="LEN")
+Pcomps = doSexRatio(Pcomps)
+writeComps(Pcomps, fname="SSPN_raw.csv", lbins=seq(8,72,2))
+Pdata$Final_Sample_Size = Pdata$Expansion_Factor_1
+Pcomps = getComps(Pdata, strat=c("Fishery","state"),Comps="LEN")
+Pcomps = doSexRatio(Pcomps)
+writeComps(Pcomps, fname="SSPN_Expansion_1.csv", lbins=seq(8,72,2))
+Pdata$Final_Sample_Size = Pdata$Expansion_Factor_1 * Pdata$Expansion_Factor_2
+Pcomps = getComps(Pdata, strat=c("Fishery","state"),Comps="LEN")
+Pcomps = doSexRatio(Pcomps)
+writeComps(Pcomps, fname="SSPN_Fully_Expanded_Comps.csv", lbins=seq(8,72,2))
