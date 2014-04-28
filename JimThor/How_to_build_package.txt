@@ -11,10 +11,13 @@ Beginning:
 2e. Make "BinaryFiles" in top-level package directory and list all files (1 per line) in the "inst/exectables/" directory
 
 Building:
-6. Open a shell (Start -> Run -> cmd)
-8. Run "R CMD build nwfscAgeingError"
-9. Run "R CMD INSTALL --build nwfscAgeingError"
+3a. Open a shell (Start -> Run -> cmd)
+3b. Run "R CMD build nwfscAgeingError"
+3c. Run "R CMD INSTALL --build nwfscAgeingError"
 
+Removing old packages:
+4a. Open a shell (Start -> Run -> cmd)  
+4b. Run "R CMD REMOVE nwfscAgeingError" 
 
 setwd("C:\\Users\\James Thorson\\Desktop\\UW Hideaway\\NWFSC\\NwfscAssmt\\JimThor\\AgeingError\\")
 package.skeleton("AgeingErrorPackage")
