@@ -1,5 +1,5 @@
 #test svn
-updateDeltaGLMcode <- function (local = NULL, save = FALSE, revision = "newest",env="nwfscDeltaGLM",pos=2)
+updateDeltaGLMcode <- function (local = NULL, save = FALSE, revision = "newest", env="nwfscDeltaGLM", pos=2)
 {
     if(!is.environment(env)) {  #if env is an environment simply wirte to that. If not, create a new environment
         if(!is.character(env)) stop("'env' must be an environment or a character vector. Use default if not sure to assign objects into global workspace\n")
@@ -20,21 +20,19 @@ updateDeltaGLMcode <- function (local = NULL, save = FALSE, revision = "newest",
             webdir <- "http://r-forge.r-project.org/scm/viewvc.php/pkg/nwfscDeltaGLM/R/?root=nwfscassmt"
             revision <- current_revision
             revDate <- lastDate[c(1:3,5:6)]
-        }
-        else {
+        }else {
             stop("VERSIONS NOT WORKING")
             if (is.numeric(revision) && revision <= current_revision) {
                 webdir <- paste("http://r4ss.googlecode.com/svn-history/r",
                   revision, "/trunk/", sep = "")
-            }
-            else {
+            }else{
                 stop("'revision' input should either be 'newest', or an integer <",
                   current_revision)
             }
         }
         cat("getting file names from", webdir, "\n")
         lines <- readLines(webdir, warn = F)
-        filenames <- lines[grep("*\\.R\"", lines)]   #"
+        filenames <- lines[ union(grep("*\\.R\"", lines), grep("*\\.r\"", lines))]   #"
         filenames <- unlist(lapply(strsplit(filenames,"name=\""),function(x){x[2]}))
         filenames <- unlist(lapply(strsplit(filenames,"\""),function(x){x[1]}))
         return(list(filenames = filenames, revision = revision, current_revision=current_revision,revDate=revDate))
