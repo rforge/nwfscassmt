@@ -1,7 +1,7 @@
-\name{Sim_Simple}
-\alias{Sim_Simple}
+\name{SimSimple}
+\alias{SimSimple}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Sim_Simple...}
+\title{SimSimple...}
 \description{Simple simulator for data to test the delta-GLMM estimator}
 \usage{
 Sim_Simple(MeanEncounter,...)
