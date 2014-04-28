@@ -1,5 +1,5 @@
 
-Sim_Simple = function(MeanEncounter, Nyears=10, Nstrata=15, Nvessels=4, Obsperyear=175, sigmaV=rep(1,2), sigmaVY=rep(1,2), sigmaS=rep(1,2), sigmaY=rep(1,2), sigmaSY=rep(1,2), sigmaResid=1){
+SimSimple = function(MeanEncounter, Nyears=10, Nstrata=15, Nvessels=4, Obsperyear=175, sigmaV=rep(1,2), sigmaVY=rep(1,2), sigmaS=rep(1,2), sigmaY=rep(1,2), sigmaSY=rep(1,2), sigmaResid=1){
 
   # Simulate effects
   betaY = array( rnorm(Nyears*2,sd=sigmaY), dim=c(2,Nyears))
