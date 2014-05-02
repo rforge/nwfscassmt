@@ -1,7 +1,19 @@
 
 
-#install.packages("nwfscDeltaGLM", repos="http://R-Forge.R-project.org", type="source")
+# Install dependencies
+install.packages('rjags')
+install.packages('R2jags')
+install.packages('pscl')
+install.packages('runjags')
+install.packages('statmod')
+install.packages('superdiag')
+
+# Install package
+install.packages("nwfscDeltaGLM", repos="http://R-Forge.R-project.org")
+
+# Load package
 library(nwfscDeltaGLM)
+# updateDeltaGLMcode()
 
 # File structure
 my.wd <- "C:/Users/James.Thorson/Desktop/"
@@ -14,6 +26,7 @@ Nrep = 100
 
 # Save object
 IndexResults = array(NA, dim=c(Nrep,Nyears,3), dimnames=list( paste("Rep",1:Nrep), paste("Year",1:Nyears), c("True","IndexMedian","SdLog") ))
+# load(file="IndexResults.RData")
 
 # Define strata
 strata.limits <- readIn(ncol=5,nlines=16)
@@ -71,3 +84,9 @@ for(RepI in 1:Nrep){
   Index_True = colSums( Pres_True * Pos_True )
   IndexResults[RepI,,"True"] = Index_True
 }
+
+# Credible interval coverage
+png( file="CIC.png", width=4, height=4, res=200, units="in")
+  hist( (log(IndexResults[,,'IndexMedian'])-log(IndexResults[,,'True']))/IndexResults[,,'SdLog'], freq=FALSE)
+  lines( x=seq(-5,5,length=1000), dnorm(seq(-5,5,length=1000)))
+dev.off()
