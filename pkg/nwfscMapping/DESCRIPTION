@@ -5,5 +5,5 @@ Version: 1.0
 Date: 2013-01-01
 Author: Allan Hicks
 Maintainer: Allan Hicks <allan.hicks@noaa.gov>
-Description: More about what it does (maybe more than one line)
+Description: Some NWFSC centric mapping functions for R
 License: What license is it under?
