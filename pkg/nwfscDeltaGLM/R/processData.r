@@ -68,7 +68,7 @@ processData = function(Truncate=0) {
   print(EncountersPerStrataYear)
   
   # Redefine variables that depend on year
-  Data[,'year'] = factor(as.character(Data[,'year'])) # Record year factor in case years have been eliminated due to missing observations
+  Data[,'year'] = factor(as.numeric(as.character(Data[,'year']))) # Record year factor in case years have been eliminated due to missing observations
   Data = data.frame(Data, 'vessel'=Letters[as.numeric(as.factor(as.character(Data[,'VESSEL'])))]) # Record year factor in case years have been eliminated due to missing observations
   # Define derived variables involving year
   Data = cbind(Data, 'strataYear'=factor(paste(Data[,'strata'],":",Data[,'year'],sep=""), levels=as.vector(outer(sort(unique(Data[,'strata'])),sort(unique(Data[,'year'])),FUN=paste,sep=":"))))
